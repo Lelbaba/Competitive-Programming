@@ -1,8 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
-
-struct P
+struct factors
 {
 	ll prm;
 	ll power;
@@ -10,42 +9,37 @@ struct P
 const ll N=1000005;
 bool is_prime[N+5];
 vector <ll> primes;
-ll divv[N+5];
+ll smallest[N+5];
 
-void seive()
-{
-    ll i,j;
-    fill(is_prime+2,is_prime+N+1,true);
-
-    for(i=2;i<=N;i++)
-    {
-        if(is_prime[i])     primes.push_back(i);
-        for(auto x:primes)
-        {
-            if(x*i>N)   break;
-            is_prime[x*i]= false;
-            divv[i]=x;
-            if(i%x==0)  break;
+void seive(){
+	memset(is_prime,true,sizeof is_prime);
+    for(ll i=2;i<=N;i++){
+        if(is_prime[i])
+        	primes.push_back(i);
+        for(auto p:primes){
+            if(p*i>N)   break;
+            is_prime[p*i] = false;
+            smallest[i] = p;
+            if(i%p==0)  break;
         }
     }
 }
 
-vector <P> factorize(ll n){
+vector <factors> factorize(ll n){
 	if(primes.empty()){
 		seive();
 	}
-	vector <P> ans;
-	for(auto x:primes){
-		if(x*x>n){
+	vector <factors> ans;
+	for(auto p:primes){
+		if(p*p>n){
 			break;
 		}
-		if(n%x==0){
+		if(n%p==0){
 			ll cnt = 0;
-			while(n%x==0){
-				cnt++;
-				n/=x;
+			while(n%p==0){
+				cnt++, n/=p;
 			}
-			ans.push_back({x,cnt});
+			ans.push_back({p,cnt});
 		}
 	}
 	if(n!=1){
@@ -54,18 +48,9 @@ vector <P> factorize(ll n){
 	return ans;
 }
 
-
 int main()
 {
-	vector <P> myans;
-	myans = factorize(24ll);
-	cout<<primes.size()<<endl;
-	for(auto x:myans){
-		printf("%lld %lld\n",x.prm,x.power);
-	}
-	myans = factorize(ll(1e9+7));
-	for(auto x:myans){
-		printf("%lld %lld\n",x.prm,x.power);
-	}
+	auto v = factorize(882000);
+	for(auto x:v) cout<<x.prm<<" "<<x.power<<endl;
 	return 0;
 }
