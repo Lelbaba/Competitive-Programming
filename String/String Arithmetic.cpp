@@ -1,3 +1,10 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+const int MONKE = 0;
+
+// untested
 
 class str_num
 {
@@ -101,3 +108,35 @@ public:
 	}
 	
 };
+
+int main()
+{
+	string s,t;
+	cin>>s>>t;
+	str_num n1(s),n2(t),n3;
+	n3 = n1+n2;
+	auto N1 = n1.v,N2 = n2.v,N3 = n3.v;
+	while(N1.size()<N3.size()) N1.push_back(0);
+	while(N2.size()<N3.size()) N2.push_back(0);
+	int sz = N3.size();
+	int p=-1;
+	for(int i=0;i<sz;i++){
+		if((N1[i]+N2[i])%10 != N3[i]) p = i;
+	}
+	if(p==-1){
+		cout<<0;
+		return MONKE;
+	}
+	vector <int> A1,A2,total;
+	for(int i=0;i<p;i++){
+		A1.push_back(N1[i]);
+		A2.push_back(N2[i]);
+		total.push_back(0);
+	}
+	total.push_back(1);
+	str_num ans(total),b1(A1),b2(A2);
+	b1 = ans-b1,b2 = ans-b2;
+	if(b1<b2) cout<<b1.s;
+	else cout<<b2.s;
+	return MONKE;
+}
