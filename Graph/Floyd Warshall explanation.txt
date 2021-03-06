@@ -6,3 +6,5 @@ suppose you relax B first, then it will become A -> C -> D -> E
 after relaxing D, the path will become A-> C-> E
 after C, A-> E
 we can see that any order of {B,C,D} will still yield this result
+
+It should be able to solve any problem that can be solved associatively with DP
