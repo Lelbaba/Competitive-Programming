@@ -8,3 +8,12 @@ after C, A-> E
 we can see that any order of {B,C,D} will still yield this result
 
 It should be able to solve any problem that can be solved associatively with DP
+
+Cycle:
+let 
+a-> b-> c-> d-> a be a cycle 
+as b,c,d will be relaxed once exactly, the path will also be considered once
+
+Negative Weight:
+it will work with negative weights as wll
+and negative cycles can be detected by checking the main diagonal
