@@ -1,0 +1,8 @@
+assume that the a path between A to E is
+A -> B -> C -> D -> E
+so, B-> C-> D is the path
+you can relax them in any order as you want but the path remains same
+suppose you relax B first, then it will become A -> C -> D -> E
+after relaxing D, the path will become A-> C-> E
+after C, A-> E
+we can see that any order of {B,C,D} will still yield this result
