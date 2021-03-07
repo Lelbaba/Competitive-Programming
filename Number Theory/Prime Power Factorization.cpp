@@ -6,25 +6,27 @@ struct factors
 	ll prm;
 	ll power;
 };
-const ll N=1000005;
-bool is_prime[N+5];
+const ll MAXN=1000005;
+bool is_prime[MAXN+5];
 vector <ll> primes;
-ll smallest[N+5];
+ll smallest[MAXN+5];
+
 
 void seive(){
 	memset(is_prime,true,sizeof is_prime);
-    for(ll i=2;i<=N;i++){
-        if(is_prime[i])
+    	for(ll i=2;i<=MAXN;i++){
+        if(is_prime[i]){
         	primes.push_back(i);
+        	smallest[i] = i;
+        }
         for(auto p:primes){
-            if(p*i>N)   break;
+            if(p*i>MAXN)   break;
             is_prime[p*i] = false;
-            smallest[i] = p;
+            smallest[p*i] = p;
             if(i%p==0)  break;
         }
     }
 }
-
 vector <factors> factorize(ll n){
 	if(primes.empty()){
 		seive();
