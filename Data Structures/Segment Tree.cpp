@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
+const int MONKE = 0;
 ll tree[300005];
 ll prop[300005];
 void update(int l,int r,int b,int e,ll num,int node){
@@ -50,5 +51,5 @@ int main()
 			}
 		}
 	}
-	return 0;
+	return MONKE;
 }
