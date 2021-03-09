@@ -29,6 +29,9 @@ while hi>=lo:
 hi -> last number where property is not true
 lo -> first number where property is true
 
+****************************
+The best approach might be to store the ans on another variable entirely while searching
+
 Example code in c++
 */
 #include <bits/stdc++.h>
