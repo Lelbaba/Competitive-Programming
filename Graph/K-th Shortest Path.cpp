@@ -30,7 +30,9 @@ void K_shortest(int n,int m){
 		v = q.top().second, w = q.top().first;
 		q.pop();
 		if(vis[v]>=k) continue;
-		dis[v][vis[v]] = w; // for the varient, check if this path is greater than previous, if not, continue
+		// for the varient, check if this path is greater than previous, if not, continue
+		//if(vis[v]>0 && w == dis[v][vis[v]-1]) continue; 
+		dis[v][vis[v]] = w; 
 		vis[v]++;
 		for(auto nd:edges[v]){
 			q.push({w+nd.first,nd.second});
