@@ -55,8 +55,8 @@ class SCC
 				for(auto x:component){
 					idx[x] = i;
 				}
+				i++;
 			}
-			i++;
 		}
 		int sz = COMPONENTS.size();
 		_DAG.resize(sz), DAG.resize(sz);
