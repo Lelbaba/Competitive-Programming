@@ -1,14 +1,15 @@
 #include <bits/stdc++.h>
+
 #define fastio ios_base::sync_with_stdio(false); cin.tie(NULL);
 #ifdef LEL
 #include "dbg.h"
 #else
 #define dbg(...) {/* temon kichu na; */}
 #endif
+
 using namespace std;
 using ll = long long;
 const int MONKE = 0;
-
 
 ll inv_mod(ll a, ll m){
     ll _m = m;
@@ -31,9 +32,10 @@ ll inv_mod(ll a, ll m){
 class combi
 {
 public:
-	ll mod = 1e9+7;
+	ll mod;
 	vector <ll> factorial,inv;
-	void init(ll n){
+	void init(ll n,ll m = ll(1e9+7)){
+		mod = m;
 		inv.reserve(n);
 		factorial.reserve(n);
 		factorial[0] = 1;
@@ -55,7 +57,13 @@ public:
 
 int main()
 {
-	com.init(200005);
-	cout<<com.C(7,3);
+	com.init(1000003,1000003);
+	int t;
+	cin>>t;
+	for(int tc = 1; tc<=t; tc++){
+		ll n,k;
+		cin>>n>>k;
+		printf("Case %d: %lld\n",tc,com.C(n,k) );
+	}
 	return MONKE;
 }
