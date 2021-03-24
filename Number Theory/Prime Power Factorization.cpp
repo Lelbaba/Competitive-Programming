@@ -1,43 +1,47 @@
 #include <bits/stdc++.h>
+
+#define fastio ios_base::sync_with_stdio(false); cin.tie(NULL);
+#ifdef LEL
+#include "dbg.h"
+#else
+#define dbg(...) {/* temon kichu na; */}
+#endif
+
 using namespace std;
 using ll = long long;
-struct factors
-{
-	ll prm;
-	ll power;
-};
-const ll MAXN=1000005;
-bool is_prime[MAXN+5];
-vector <ll> primes;
-ll smallest[MAXN+5];
+const int MONKE = 0;
 
+vector <bool> prime;
+vector <ll> primes,smallest;
 
-void seive(){
-	memset(is_prime,true,sizeof is_prime);
-    	for(ll i=2;i<=MAXN;i++){
-        if(is_prime[i]){
-        	primes.push_back(i);
+void seive(ll n = ll(1e6)){
+	prime.assign(n+1,true);
+	smallest.assign(n+1,0);
+    for(ll i=2;i<=n;i++){
+        if(prime[i]){
         	smallest[i] = i;
+        	primes.push_back(i);
         }
         for(auto p:primes){
-            if(p*i>MAXN)   break;
-            is_prime[p*i] = false;
+            if(p*i>n)   break;
+            prime[p*i] = false;
             smallest[p*i] = p;
             if(i%p==0)  break;
         }
     }
 }
-vector <factors> factorize(ll n){
+
+vector <pair <ll,int> > factorize(ll n){
 	if(primes.empty()){
 		seive();
 	}
-	vector <factors> ans;
+	vector <pair<ll,int> > ans;
 	for(auto p:primes){
 		if(p*p>n){
 			break;
 		}
 		if(n%p==0){
-			ll cnt = 0;
+			int cnt = 0;
 			while(n%p==0){
 				cnt++, n/=p;
 			}
@@ -50,9 +54,12 @@ vector <factors> factorize(ll n){
 	return ans;
 }
 
+
 int main()
 {
-	auto v = factorize(882000);
-	for(auto x:v) cout<<x.prm<<" "<<x.power<<endl;
-	return 0;
+	auto b = factorize(65536);
+	for(auto x:b){
+		cout<<x.first<<" "<<x.second<<endl;
+	}
+	return MONKE;
 }
