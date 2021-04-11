@@ -12,52 +12,41 @@ using ll = long long;
 const int MONKE = 0;
 
 vector <bool> prime;
-vector <ll> primes,smallest;
+vector <ll> primes;
 
-void seive(ll n = ll(1e6)){
-	prime.assign(n+1,true);
-	smallest.assign(n+1,0);
+void seive(ll n = 1<<20){
+    prime.assign(n+1,true);
+    
     for(ll i=2;i<=n;i++){
-        if(prime[i]){
-        	smallest[i] = i;
-        	primes.push_back(i);
-        }
+        if(prime[i]) 
+            primes.push_back(i);
+
         for(auto p:primes){
-            if(p*i>n)   break;
+            if(p*i>n or (i-1)%p == 0)   break;
             prime[p*i] = false;
-            smallest[p*i] = p;
-            if(i%p==0)  break;
         }
     }
 }
 
-vector <pair <ll,int> > factorize(ll n){
-	if(primes.empty()){
-		seive();
-	}
-	vector <pair<ll,int> > ans;
+vector <pair<ll,int>> factorize(ll n){
+	if(primes.empty()) seive();
+	int cnt = 0;
+	vector <pair<ll,int>> ans;
+
 	for(auto p:primes){
-		if(p*p>n){
-			break;
-		}
-		if(n%p==0){
-			int cnt = 0;
-			while(n%p==0){
-				cnt++, n/=p;
-			}
-			ans.push_back({p,cnt});
-		}
+		if(p*p>n) break;
+		for(cnt=0; n%p==0; cnt++,n/=p);
+		if (cnt>0) ans.emplace_back(p,cnt);
 	}
-	if(n!=1){
-		ans.push_back({n,1});
-	}
+
+	if(n!=1) ans.emplace_back(n,1);
 	return ans;
 }
 
 
 int main()
 {
-	auto b = factorize(65536);
+	auto b = factorize(72);
 	for(auto x:b){
 		cout<<x.first<<" "<<x.second<<endl;
 	}

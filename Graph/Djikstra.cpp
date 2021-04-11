@@ -1,102 +1,62 @@
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
-
-const int maxn = 100005;
-struct edge{
-	int v;
-	ll w;
-	bool operator < (const edge &rhs) const{
-		return w > rhs.w;
+using edge = pair <ll,ll>;
+class djikstra{
+public:
+	ll n = -1;
+	vector <vector <edge> > adj;
+	vector <ll> D,path;
+	djikstra(vector < vector <edge> > &A){
+		n = A.size();
+		adj = A;
+		D.assign(n,LLONG_MAX);
+		path.assign(n,-1);
 	}
+	void find_shortest_paths(ll s) {
+		priority_queue < edge, vector <edge>, greater<edge> > Q;
+		Q.emplace(s,0);
+		while(!Q.empty()){
+
+			ll node = Q.top().second, d = Q.top().first;
+			Q.pop();
+			if(d>D[node]) continue;
+			D[node] = d; 
+			for(auto e:adj[node]){
+				ll _next = e.second, dis = e.first;
+				if(D[_next]>dis+d){
+					D[_next] = dis+d;
+					path[_next] = node;
+					Q.emplace(dis+d,_next);
+				}
+			}
+		}
+	}
+
 };
-struct graph{
-	ll inf = (1LL<<61);
-	int n;
-	vector <edge> V[maxn];
-
-
-	ll D[maxn];
-	int path[maxn];
-	ll djikstra(int s,int f) {
-		int i,u,v;
-		ll d,w;
-		priority_queue <edge> Q;
-		for(i=0;i<n;i++){
-			D[i]=inf;
-		}
-		D[s] = 0;
-		path[f] = path[s] = -1;
-		Q.push({s,0});
-		while(!Q.empty()){
-			u = Q.top().v;
-			d = Q.top().w;
-			if(u==f) return d;
-			Q.pop();
-			for(auto X:V[u]){
-				v = X.v;
-				w = X.w;
-				if(D[v]>d+w){
-					D[v] = d+w;
-					path[v] = u;
-					Q.push({v,D[v]});
-				}
-			}
-		}
-		return D[f];
-	}
-	vector <ll> djikstra(int s) {
-		int i,u,v;
-		ll d,w;
-		priority_queue <edge> Q;
-		for(i=0;i<n;i++){
-			D[i]=inf;
-		}
-		D[s] = 0;
-		Q.push({s,0});
-		while(!Q.empty()){
-			u = Q.top().v;
-			d = Q.top().w;
-			Q.pop();
-			for(auto X:V[u]){
-				v = X.v;
-				w = X.w;
-				if(D[v]>d+w){
-					D[v] = d+w;
-					Q.push({v,D[v]});
-				}
-			}
-		}
-		vector <ll> ans;
-		for(i=0;i<n;i++){
-			ans.push_back(D[i]);
-		}
-		return ans;
-	}
-
-}g1;
-
 int main()
 {
-	int e,i,j,k,n,m,u,v,t,a,b,c,r;
-	ll w;
+	int n,m;
 	cin>>n>>m;
-	g1.n = n;
-	for(i=0;i<m;i++){
+	vector <vector <edge> > adj(n);
+	for(int i=0;i<m;i++){
+		ll u,v,w;
 		cin>>u>>v>>w;
-		u--;v--;
-		g1.V[u].push_back({v,w});
-		g1.V[v].push_back({u,w});
+		adj[u-1].emplace_back(w,v-1);
+		adj[v-1].emplace_back(w,u-1);
 	}
-	g1.djikstra(0,n-1);
-	r = n-1;
-	if(g1.path[r]==-1)	cout<<-1;
-	else{
-		deque <int> ans;
+	djikstra G(adj);
+	G.find_shortest_paths(0);
+	int r = n-1;
+	if(G.path[r]==-1){
+		cout<<-1;
+	} else{
+		vector <int> ans;
 		while(r>=0){
-			ans.push_front(r+1);
-			r = g1.path[r];
+			ans.push_back(r+1);
+			r = G.path[r];
 		}
+		reverse(ans.begin(), ans.end());
 		for(auto x:ans)	cout<<x<<" ";
 	}
 	return 0;

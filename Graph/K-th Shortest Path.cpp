@@ -25,7 +25,7 @@ void K_shortest(int n,int m){
 	vector <int> vis(n); 
 	priority_queue <pii ,vector <pii >, greater< pii > > q;
 
-	q.push({0ll,st});
+	q.emplace(0ll,st);
 	while(!q.empty()){
 		v = q.top().second, w = q.top().first;
 		q.pop();
@@ -35,7 +35,7 @@ void K_shortest(int n,int m){
 		dis[v][vis[v]] = w; 
 		vis[v]++;
 		for(auto nd:edges[v]){
-			q.push({w+nd.first,nd.second});
+			q.emplace(w+nd.first,nd.second);
 		}
 	}
 	ll ans = dis[des][k-1];

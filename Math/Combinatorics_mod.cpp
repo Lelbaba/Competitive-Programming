@@ -36,8 +36,8 @@ public:
 	vector <ll> factorial,inv;
 	void init(ll n,ll m = ll(1e9+7)){
 		mod = m;
-		inv.reserve(n);
-		factorial.reserve(n);
+		inv.reserve(n+1);
+		factorial.reserve(n+1);
 		factorial[0] = 1;
 		inv[0] = inv_mod(1,mod);
 		for(int i=1;i<=n;i++){
