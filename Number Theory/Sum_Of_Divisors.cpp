@@ -13,12 +13,10 @@ const int MONKE = 0;
 //CF 1512 G
 
 vector <bool> prime;
-vector <ll> primes,SOD,SPF_pow;
+vector <ll> primes,SOD,SPF_pow; //SPF_pow stores the greatest power of SPF 
 
 void seive(ll n = 1<<20){
-    prime.assign(n+1,true),SPF_pow.assign(n+1,1);
-    SOD.resize(n+1);
-    SOD[1] = 1;
+    prime.assign(n+1,true), SPF_pow.assign(n+1,1), SOD.assign(n+1,1);
 
     for(ll i=2;i<=n;i++){
         if(prime[i]) {
