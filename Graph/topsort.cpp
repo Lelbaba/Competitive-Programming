@@ -36,7 +36,6 @@ public:
 		}
 		while(!q.empty()){
 			auto t = q.front();
-			dbg(t);
 			order.push_back(t);
 			q.pop();
 			for(auto v:adj[t]){

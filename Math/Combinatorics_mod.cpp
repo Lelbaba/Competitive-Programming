@@ -12,23 +12,17 @@ using ll = long long;
 const int MONKE = 0;
 
 ll inv_mod(ll a, ll m){
-    ll _m = m;
-    ll y = 0, x = 1;
+    ll _m = m,q,t,x,y;
+    if (m == 1) return 0;
  
-    if (m == 1)
-        return 0;
- 
-    while (a > 1) {
-        ll q = a / m, t = m;
-        m = a % m, a = t;
+    for (y = 0, x = 1;  a>1;  y = x-q*y, x = t) {
+        q = a/m, t = m;
+        m = a%m, a = t;
         t = y;
-        y = x - q * y;
-        x = t;
     }
-    if (x < 0)
-        x += _m;
-    return x;
+    return x < 0 ? x+_m: x;
 }
+
 class combi
 {
 public:

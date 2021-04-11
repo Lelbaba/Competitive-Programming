@@ -15,25 +15,6 @@ const int MONKE = 0;
 vector <bool> prime;
 vector <ll> primes,SOD,SPF_pow;
 
-
-vector <bool> prime;
-vector <ll> primes;
-
-void seive(ll n = 1<<20){
-    prime.assign(n+1,true);
-    
-    for(ll i=2;i<=n;i++){
-        if(prime[i]) {
-            primes.push_back(i);
-        }
-
-        for(auto p:primes){
-            if(p*i>n or (i-1)%p == 0)   break;
-            prime[p*i] = false;
-        }
-    }
-}
-
 void seive(ll n = 1<<20){
     prime.assign(n+1,true),SPF_pow.assign(n+1,1);
     SOD.resize(n+1);
