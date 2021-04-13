@@ -7,17 +7,16 @@ using cd = complex <double> ;
 
 void FFT(vector < cd > &P, bool inverse){
 	int n = P.size();	
-	if(n==1){
+	if(n==1) 
 		return;
-	}
 	int f = 0;
 	cd w = polar(1.00,2*pi/n),W = 1;
-	if(inverse){
+	if(inverse)
 		w = 1.00/w;
-	}
 	vector < cd > p[2];
 	for(auto x:P){
-		p[f].push_back(x); f^=1;
+		p[f].push_back(x); 
+		f^=1;
 	}
 	FFT(p[0],inverse);
 	FFT(p[1],inverse);
@@ -26,10 +25,8 @@ void FFT(vector < cd > &P, bool inverse){
 		P[i] = p[0][i] + W*p[1][i];
 		P[i+n/2] = p[0][i] - W*p[1][i];
 		W*=w;
-		if(inverse){
-			P[i]/=2;
-			P[i+n/2]/=2;
-		}
+		if(inverse)
+			P[i]/=2, P[i+n/2]/=2;
 	}
 }
 
@@ -55,19 +52,13 @@ vector<int> multiply(vector<int> const& a, vector<int> const& b) {
 
 int main()
 {
-	vector <cd > V;
-	V.push_back(1);
-	V.push_back(9);
-	V.push_back(3);
-	V.push_back(1);
-	V.push_back(3.5);
-	V.push_back(2.8);
-	V.push_back(3.6);
-	V.push_back(0);
+	vector <cd > V = {1,9,3,1,3.5,2.8,3.6,0};
 	FFT(V,0);
 	FFT(V,1);
-	for(auto x:V){
-		cout<<x<<endl;
+	vector <double> result(V.size());
+	transform(V.begin(),V.end(),result.begin(),[](cd &x){return x.real();});
+	for(auto x:result){
+		cout<<fixed<<setprecision(2)<<x<<endl;
 	}
 	return 0;
 }
