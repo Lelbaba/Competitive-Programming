@@ -15,6 +15,7 @@ const int maxn = (1<<20)+5 ;
 int logs[maxn] = {0};
 
 void compute_logs(){
+	// can also use log(x) = 31 - __builtin_clz(x)
 	logs[1] = 0;
 	for(int i=2;i<(1<<20);i++){
 		logs[i] = logs[i/2]+1;
@@ -29,7 +30,7 @@ class Sparse_Table
 		ll identity;
 
 	Sparse_Table(vector <ll> &v, function <ll(ll,ll)> _func, ll id){
-		if(logs[2] != 2) compute_logs();
+		if(logs[2] != 1) compute_logs();
 		int sz = v.size();
 		table.assign(sz,vector <ll>(logs[sz]+1) );
 		func = _func, identity = id;
@@ -49,7 +50,7 @@ class Sparse_Table
 	}
 	// other cases like sum
 	ll Query(int l,int r){
-		if(l>r) return identity; // handle basecase
+		if(l>r) return identity; 
 		int pow = logs[r - l + 1];
 		return func(table[l][pow], Query(l+(1<<pow), r));
 	}
@@ -76,7 +77,7 @@ void solve(){
 			mn = min(mn,arr[l-1]-arr[r]+MIN.query(r+1,n));
 			mx = max(mx,arr[l-1]-arr[r]+MAX.query(r+1,n));
 		}
-		cout<<mx-mn+1<<endl;
+		cout<<mx-mn+1<<'\n';
 	}
 }
 
