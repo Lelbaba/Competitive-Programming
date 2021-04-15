@@ -15,7 +15,7 @@ public:
 	}
 	void find_shortest_paths(ll s) {
 		priority_queue < edge, vector <edge>, greater<edge> > Q;
-		Q.emplace(s,0);
+		Q.emplace(0,s);
 		while(!Q.empty()){
 
 			ll node = Q.top().second, d = Q.top().first;
