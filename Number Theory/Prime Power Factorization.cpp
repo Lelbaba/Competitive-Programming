@@ -22,8 +22,9 @@ void seive(ll n = 1<<20){
             primes.push_back(i);
 
         for(auto p:primes){
-            if(p*i>n or (i-1)%p == 0)   break;
+            if(p*i>n)   break;
             prime[p*i] = false;
+            if(i%p == 0) break;
         }
     }
 }
