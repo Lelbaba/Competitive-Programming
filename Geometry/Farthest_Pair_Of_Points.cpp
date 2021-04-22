@@ -2,28 +2,51 @@
 using namespace std;
 
 
-struct point
-{
-	int x,y;
-	point(int X = 0,int Y = 0) {x=X, y=Y;}
-	point operator + (const point &rhs) {return point(x+rhs.x,y+rhs.y);}
-	point operator - (const point &rhs) {return point(x-rhs.x,y-rhs.y);}
-	int operator * (const point &rhs) {return (x*rhs.y- y*rhs.x);}
-	bool operator < (const point &rhs) {return x<rhs.x|| (x==rhs.x && y<rhs.y);}
-	int dis_sq(const point &rhs) {return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);}
-	int tri_area(point a,point b){
-		return (a-*this)*(b-*this);
-	}
-	void scan(){
-		scanf("%d %d", &x,&y);
-	}
+template <typename DT> 
+class point{
+    public:
+        DT x,y;
+    point(DT X = 0,DT Y = 0) {
+        x=X, y=Y;
+    }
+    point operator + (point rhs) {
+        return point(x+rhs.x,y+rhs.y);
+    }
+    point operator - (point rhs){
+        return point(x-rhs.x,y-rhs.y);
+    }
+    point operator * (DT M){
+        return point(M*x,M*y);
+    }
+    point operator / (DT M){
+        return point(x/M,y/M);
+    }
+    bool operator < (point rhs) {
+        return x<rhs.x|| (x==rhs.x && y<rhs.y);
+    }
+    DT cross(point rhs){
+        return (x*rhs.y- y*rhs.x);
+    }
+    DT dis_sq(point rhs){
+        return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);
+    }
+    DT tri_area(point a,point b){
+        return (a-*this).cross((b-*this));
+    }
+    DT dot(point rhs){
+        return x*rhs.x + y*rhs.y; 
+    }
+    void scan(){
+        cin>>x>>y;
+    }
 };
 
-vector <point> Convex_Hull(vector <point> &points){
+using pt = point <int>;
+vector <pt> Convex_Hull(vector <pt> &points){
 
 	sort(points.begin(),points.end());
 	int m=0, n=points.size();
-	vector <point> hull(n+n+2);
+	vector <pt> hull(n+n+2);
 	for(int i=0;i<n;i++){ 
 		while(m>1 && (hull[m-2].tri_area(hull[m-1],points[i]))<=0 ) m--;
 		hull[m++] = points[i];
@@ -38,7 +61,7 @@ vector <point> Convex_Hull(vector <point> &points){
 	return hull;
 }
 
-int Rotating_Callipars(vector <point> p){
+int Rotating_Callipars(vector <pt> p){
 	int n = p.size();
 	int ans = -1e9, j=1;
 	for(int i=0;i<n;i++)
@@ -54,7 +77,7 @@ int main()
 {
 	int n;
 	scanf("%d", &n);
-	vector <point> V(n);
+	vector <pt> V(n);
 	for(auto &x:V) x.scan();
 	printf("%.8lf", sqrt(Rotating_Callipars(Convex_Hull(V))) );
 	return 0;

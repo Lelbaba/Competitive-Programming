@@ -11,95 +11,50 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 
-class node{
-    public:
-        vector <int> route;
-        int path = 0, leaf = 0;
-    node(int n = 0){
-        route.assign(n,-1);
-    }
-};
+int koto(int num,int n, int t){
+    int r = num%n;
+    int lagbe = ((t-r)%n + n )%n;
+    return lagbe;
+}
+/*
+    main idea is -
+    ami pura array take 
+    0 1 2 3 4 5... n-1 
+    banai felbo
+    tahole protita operation e ami ekdom last number theke shuru korbo and try
+    korbo oitake  "i-th number(0 indexing) er shathe kichu ekta jog kore i(mod n) 
+    banate".
+    Last theke shuru korbo karon er ager index e ei operation use korle eitar
+    upor effect thakbe na.  
+    eita korar jonno joto jog kora lagbe shei number ta amake
+    "koto" function ta dibe. 
+    tahole
 
-class TRIE{
-    public:
-        int ptr = 0,n;
-        vector <node> Tree;
-        node temp;
-    TRIE(int _n){
-        n = _n;
-        temp = node(n);
-        Tree.push_back(temp);
-    }
-    void insert(vector <int> &seq){
-        int cur = 0;
-        Tree[0].path++;
-        for(auto x:seq){
-            int& erpor = Tree[cur].route[x];
-            if(erpor == -1){
-                Tree.push_back(temp);
-                erpor = ++ptr;
-            }
-            cur = erpor;
-            Tree[cur].path++;
-        }
-        Tree[cur].leaf++;
-    }
-    void erase(vector <int> &seq){
-        int cur = 0;
-        Tree[0].path++;
-        for(auto x:seq){
-            assert(Tree[cur].path >= 0);
-            cur = Tree[cur].route[x];
-            Tree[cur].path--;
-        }
-        Tree[cur].leaf--;
-    }
-    bool find(vector <int> &seq){
-        int cur = 0;
-        for(auto x:seq){
-            cur = Tree[cur].route[x];
-            if(cur < 0 or Tree[cur].path == 0) 
-                return false;
-        }
-        return Tree[cur].leaf > 0;
-    }
-    int max_xor(vector <int> &seq){
-        int cur = 0, val = 0;
-        for(auto x:seq){
-            val <<= 1;
-            int bad = Tree[cur].route[x], good = Tree[cur].route[x^1];
-            if(good >=0 and Tree[good].path>0){
-                val+= (x^1);
-                cur = good;
-            } else {
-                val+= x;
-                cur = bad;
-            } 
-        }
-        return val;
-    }
-};
-
+*/
 int main()
 {
     monke_flip
-    TRIE T(2);
-    vector <int> v(32);
-    T.insert(v);
-    int n,x;
-    char ch;
-    cin >>n;
-    for(int i=0;i<n;i++){
-        cin >>ch >>x;
-        for(int i=31;i>=0;i--){
-            v[31-i] = (x&(1<<i)) ? 1:0;
-        } 
-        if(ch == '+') T.insert(v);
-        else if(ch == '-') T.erase(v);
-        else{
-            int val = T.max_xor(v);
-            cout<<(x^val)<<'\n';
-        }
+    int n;
+    cin>>n;
+    vector <int> v(n);
+    for(auto &e:v){
+        cin>>e;
     }
+    int added = 0;
+    int op = 1;
+    vector <int> add(n+1);
+    for(int i = n-1;i>=0;i--){
+        int val = koto(v[i]+added,n,i);
+        v[i] = (v[i] + val + added) % n;
+        added += val;
+        add[i+1] = val;
+        if(val > 0) op++;
+    }
+    cout<<op<<'\n';
+    for(int i = n; i>0; i--){
+        if(add[i] == 0) continue;
+        cout<<1<<' '<<i<<' '<<add[i]<<'\n';
+    }
+    cout<<2<<' '<<n<<' '<<n;
     return MONKE;
 }

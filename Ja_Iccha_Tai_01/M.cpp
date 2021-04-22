@@ -82,7 +82,6 @@ class TRIE{
 
 int main()
 {
-    monke_flip
     TRIE T(2);
     vector <int> v(32);
     T.insert(v);
