@@ -52,8 +52,12 @@ class point{
 void solve(){
     pair< point <int>,point <int> > P,Q;
     P.first.scan(); P.second.scan(); Q.first.scan(); Q.second.scan();
-    point <int> ans = (Q.second-P.first < P.second - Q.first) ? P.second - Q.first:Q.second-P.first;
-    cout<< (ans.x >0 and ans.y>0) ? 
+    point <int> lo(max(P.first.x,Q.first.x),max(P.first.y,Q.first.y));
+    point <int> hi(min(P.second.x,Q.second.x),min(P.second.y,Q.second.y));
+    if(hi.x>lo.x and hi.y> lo.y)
+        cout<<lo.x<<" "<<lo.y<<" "<<hi.x<<" "<<hi.y<<'\n';
+    else 
+        cout<<"No Overlap\n";
 }
 
 int main()
@@ -62,6 +66,8 @@ int main()
     int t = 1; 
     cin>>t;
     for(int tc=1; tc<=t; tc++){
+        if(tc>1) 
+            cout<<'\n';
         solve();
     }
     return MONKE;
