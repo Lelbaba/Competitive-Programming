@@ -11,6 +11,7 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 // CF 706 D
+
 class node{
     public:
         vector <int> route;
@@ -19,7 +20,6 @@ class node{
         route.assign(n,-1);
     }
 };
-
 class TRIE{
     public:
         int ptr = 0,n;
@@ -27,8 +27,7 @@ class TRIE{
         node temp;
     TRIE(int _n){
         n = _n;
-        temp = node(n);
-        Tree.push_back(temp);
+        Tree.emplace_back(n);
     }
     void insert(vector <int> &seq){
         int cur = 0;
@@ -36,7 +35,7 @@ class TRIE{
         for(auto x:seq){
             int& erpor = Tree[cur].route[x];
             if(erpor == -1){
-                Tree.push_back(temp);
+                Tree.emplace_back(n);
                 erpor = ++ptr;
             }
             cur = erpor;

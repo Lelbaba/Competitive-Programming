@@ -7,11 +7,12 @@ public:
 	ll n = -1;
 	vector <vector <edge> > adj;
 	vector <ll> D,path;
-	djikstra(vector < vector <edge> > &A){
+	djikstra(vector < vector <edge> > &A,ll x){
 		n = A.size();
 		adj = A;
 		D.assign(n,LLONG_MAX);
 		path.assign(n,-1);
+		find_shortest_paths(x);
 	}
 	void find_shortest_paths(ll s) {
 		priority_queue < edge, vector <edge>, greater<edge> > Q;
@@ -45,8 +46,7 @@ int main()
 		adj[u-1].emplace_back(w,v-1);
 		adj[v-1].emplace_back(w,u-1);
 	}
-	djikstra G(adj);
-	G.find_shortest_paths(0);
+	djikstra G(adj,0);
 	int r = n-1;
 	if(G.path[r]==-1){
 		cout<<-1;
