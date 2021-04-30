@@ -10,12 +10,11 @@
 using namespace std;
 using ll = long long;
 const int MONKE = 0;
-
 template <typename DT>
 class vertex{
     public:
-        DT val, lazy, l, r, state = -1;
-        DT iden = 0;
+        DT val, lazy, iden = 0;
+        int l, r, state = -1;
     vertex(DT _val = 0, DT _lazy = 0){
         // default values should be the identity 
         val = _val, lazy = _lazy;
