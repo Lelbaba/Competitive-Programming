@@ -7,8 +7,7 @@ using ll = long long;
 const int MONKE = 0;
 
 // 5472940991761 worst carmichael number
-vector <int> primes;
-vector <bool> prime(200,true);
+
 ll bigmul(ll num,ll pow,ll mod){
 	ll ans = 0;
 	for(;pow>0;pow>>=1){
@@ -26,6 +25,9 @@ ll bigmod(ll num,ll pow,ll mod){
 	return ans;
 }
 
+// handle bigmod overflow
+vector <int> primes;
+vector <bool> prime(200,true);
 bool check_primality(ll p){
 	if(p<2) return false;
 	if(primes.empty()){

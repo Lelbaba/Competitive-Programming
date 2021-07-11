@@ -2,7 +2,7 @@
 using namespace std;
 using ll = long long;
 const int MONKE = 0;
-
+const double eps = 1e-9;
 template <typename DT>
 class line{
     public:
@@ -12,11 +12,11 @@ class line{
         O = p;
     }
     bool parallel(line &L){
-        return fabs(dir.cross(L.dir)) < eps;
+        return fabs(dir & L.dir) < eps;
     }
     bool collinear(point <DT> &p){
         point <DT> tem = p - O;
-        return fabs(dir.cross(tem)) < eps;
+        return fabs(dir & tem) < eps;
     }
     int intersection(line L, point <double> &p){
         if(parallel(L)){
@@ -24,7 +24,7 @@ class line{
             return 0;
         }
         point <DT> R = L.O - O;
-        double t = double(R.cross(L.dir))/dir.cross(L.dir);
+        double t = double(R & L.dir)/(dir & L.dir);
         point <double> ans(O.x,O.y), DIR(dir.x,dir.y);
         p = ans + (DIR*t);
         return 1;

@@ -11,17 +11,23 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 //LOJ- Solutions to an Equation
-ll egcd(ll a,ll b,ll& x, ll& y){
-	if(b==0){
-		x = 1,y = 0;
-		return a;
+class gcd_dt{
+	public:
+		ll x,y,g;
+	gcd_dt(ll _x,ll _y,ll _g){
+		x = _x, y = _y, g = _g;
 	}
-	ll _x=1,_y=1,d = egcd(b,a%b,_x,_y);
-	x = _y, y = _x - _y * (a/b);
-	return d;
+};
+gcd_dt egcd(ll a,ll b){
+	if(b==0){
+		return gcd_dt(1,0,a);
+	}
+	auto tem = egcd(b,a%b);
+	return gcd_dt(tem.y, tem.x - a/b*tem.y, tem.g);
 }
 bool get_solution(ll a,ll b,ll c,ll& x,ll& y,ll& g){
-	g = egcd(abs(a),abs(b),x,y);
+	auto d = egcd(abs(a),abs(b));
+	g = d.g, x = d.x, y = d.y;
 	x *= c/g, y*= c/g;
 	if(a<0) x = -x;
 	if(b<0) y = -y;

@@ -25,8 +25,11 @@ class point{
     bool operator < (point rhs) {
         return x<rhs.x|| (x==rhs.x && y<rhs.y);
     }
-    DT cross(point rhs){
-        return (x*rhs.y- y*rhs.x);
+    DT operator & (point rhs){
+        return (x*rhs.y- y*rhs.x);      // cross product
+    }
+    DT operator ^ (point rhs){
+        return x*rhs.x + y*rhs.y;       // dot product 
     }
     DT dis_sq(point rhs){
         return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);
@@ -34,14 +37,7 @@ class point{
     DT tri_area(point a,point b){
         return (a-*this).cross((b-*this));
     }
-    DT dot(point rhs){
-        return x*rhs.x + y*rhs.y; 
-    }
-    void scan(){
-        cin>>x>>y;
-    }
 };
-
 int main()
 {
     return MONKE;
