@@ -14,92 +14,108 @@ const int MONKE = 0;
 const double eps = 1e-9;
 using dt = double;
 // UVA 10173
+
+const double PI = acos(-1), EPS = 1e-10;
+#define sq(x) (x)*(x)
+
 template <typename DT> 
 class point{
     public:
         DT x,y;
-    point(DT X = 0,DT Y = 0) {
-        x=X, y=Y;
-    }
-    point operator + (point rhs) {
-        return point(x+rhs.x,y+rhs.y);
-    }
-    point operator - (point rhs){
-        return point(x-rhs.x,y-rhs.y);
-    }
-    point operator * (DT M){
-        return point(M*x,M*y);
-    }
-    point operator / (DT M){
-        return point(x/M,y/M);
-    }
-    bool operator < (point rhs) {
-        return x<rhs.x|| (x==rhs.x && y<rhs.y);
-    }
-    DT cross(point rhs){
-        return (x*rhs.y- y*rhs.x);
-    }
-    DT dis_sq(point rhs){
-        return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);
-    }
-    DT tri_area(point a,point b){
-        return (a-*this).cross((b-*this));
-    }
-    DT dot(point rhs){
-        return x*rhs.x + y*rhs.y; 
-    }
-    void scan(){
-        cin>>x>>y;
+    point() = default;
+    point(DT x, DT y): x(x), y(y) {};
+    
+    point operator + (point rhs) const { return point(x + rhs.x, y + rhs.y); }
+    point operator - (point rhs) const { return point(x - rhs.x, y - rhs.y); }
+
+    point operator * (DT M)      const { return point(M * x, M * y); }
+    point operator / (DT M)      const { return point(x / M, y / M); }
+    bool  operator < (point rhs) const { return x < rhs.x or (x == rhs.x and y < rhs.y); }
+    point operator == (point rhs) const { return x == rhs.x and y == rhs.y; }
+    point operator != (point rhs) const { return x != rhs.x or y != rhs.y; } 
+    DT operator & (point rhs)     const { return x * rhs.y - y * rhs.x; }     // cross product
+    DT operator ^ (point rhs)     const { return x * rhs.x + y * rhs.y; }     // dot product
+    DT operator ~()     const {return sq(x) + sq(y); }                        //square of norm
+    point operator - () const {return *this * -1; }    
+    friend istream& operator >> (istream &is, point &p) { return is >> p.x >> p.y; }
+    friend ostream& operator << (ostream &os, const point &p) { return os << p.x << " " << p.y; }
+    
+    friend DT dis_sq(point a, point b){ return sq(a.x-b.x) + sq(a.y-b.y); }
+    friend DT tri_area(point a,point b, point c){ return (b-a) & (c-a); }
+    friend double angle(point u) { return atan2(u.y, u.x); }
+    friend int dcmp(DT x) { return fabs(x) < EPS ? 0 : (x<0 ? -1 : 1);}
+    friend double angle(point a, point b) {
+        double ans = angle(b) - angle(a);
+        return ans <= -PI ? ans + 2*PI : (ans > PI ? ans - 2*PI : ans);
     }
 };
 
-using pt = point <double>;
-vector <pt> Convex_Hull(vector <pt> &points){
+template <typename DT> using polygon = vector <point <DT>>; 
+namespace PG{
+    template <typename DT> polygon <DT> Convex_Hull(polygon <DT> &PT){
+        sort(PT.begin(), PT.end());
+        int m = 0, n = PT.size();
 
-	sort(points.begin(),points.end());
-	int m=0, n=points.size();
-	vector <pt> hull(n+n+2);
-	for(int i=0;i<n;i++){ 
-		while(m>1 && (hull[m-2].tri_area(hull[m-1],points[i]))<=0 ) m--;
-		hull[m++] = points[i];
-	}
-	int k=m;
-	for(int i=n-2;i>=0;i--){
-		while(m>k && (hull[m-2].tri_area(hull[m-1],points[i]))<=0) m--;
-		hull[m++] = points[i];
-	}
-	if(n>1) m--;
-	while(hull.size()>m) hull.pop_back();
-	return hull;
-}
-double rotating_calipers(vector <pt> &p){
-	int n = p.size(), l=1, r=1, u=1;
-	double area = 1e20;
-	for(int i=0;i<n;i++){
-		pt edge = (p[(i+1)%n]- p[i])/sqrt(p[i].dis_sq(p[(i+1)%n]));
+        polygon <DT> hull(n+n+2);
+        for(int i=0; i<n; i++){ 
+            for( ; m > 1 and tri_area(hull[m-2], hull[m-1], PT[i]) <= 0; m-- );
+            hull[m++] = PT[i];
+        }
+        for(int i = n-2, k = m; i >= 0; i--){
+            for( ; m>k and tri_area(hull[m-2], hull[m-1], PT[i]) <= 0; m--);
+            hull[m++] = PT[i];
+        }
+        if(n>1) 
+            m--;
+        while(hull.size() > m) 
+            hull.pop_back();
+        return hull;
+    }
 
-		while(edge.dot(p[r%n]-p[i]) < edge.dot(p[(r+1)%n]-p[i])) r++;
-		while(u<r || edge.cross(p[u%n]-p[i]) < edge.cross(p[(u+1)%n]-p[i])) u++;
-		while(l<u || edge.dot(p[l%n]-p[i]) > edge.dot(p[(l+1)%n]-p[i])) l++;
-		
-		double w = edge.dot(p[r%n]-p[i]) - edge.dot(p[l%n]-p[i]);
-		double h = fabs(p[u%n].tri_area(p[i],p[(i+1)%n]))/sqrt(p[i].dis_sq(p[(i+1)%n]));
-		area = min(area,w*h);
-	}
-	if(area>1e19) area = 0;
-	return area;
-}
+    template <typename DT> DT minimum_bounding_box(polygon <DT> P){
+        auto p = Convex_Hull(P);
+        int n = p.size();
+        DT area = 1e20 + 5;
+        for(int i = 0, l = 1, r = 1, u = 1 ;   i < n ;   i++){
+            point <DT> edge = (p[(i+1)%n]- p[i])/sqrt(dis_sq(p[i], p[(i+1)%n]));
+
+            for( ; (edge ^ p[r%n]-p[i]) < (edge ^ p[(r+1)%n] - p[i]); r++); 
+            for( ; u<r || (edge & p[u%n] - p[i]) < (edge & p[(u+1)%n] - p[i]); u++) ;
+            for( ; l<u || (edge ^ p[l%n] - p[i]) > (edge ^ p[(l+1)%n] - p[i]); l++);
+            
+            double w = (edge ^ p[r%n]-p[i]) - (edge ^ p[l%n] - p[i]);
+            double h = fabs(tri_area(p[u%n], p[i], p[(i+1)%n]))/sqrt(dis_sq(p[i], p[(i+1)%n]));
+            area = min(area,w*h);
+        }
+        if(area>1e19) 
+            area = 0;
+        return area;
+    }
+    template <typename DT> DT farthest_pair_of_points(polygon <DT> p){
+        p = Convex_Hull(p);
+        int n = p.size();
+        DT ans = -1e9;
+        for(int i=0, j = 1; i < n; i++)
+        {   
+            for( ; abs(tri_area(p[i], p[(i+1)%n], p[(j+1)%n])) > abs(tri_area(p[i], p[(i+1)%n], p[j])) ; j = (j+1)%n ) ;
+            ans = max(ans, dis_sq(p[i], p[j]));
+            ans = max(ans, dis_sq(p[(i+1)%n], p[j]));
+        }
+        return ans;
+    }
+};
+
 int main()
-{
+{	
 	int n;
 	monke_flip
 	while(true){
 		cin>>n;
 		if(n==0) break;
-		vector <pt> v(n);
-		for(auto &e:v) e.scan();
-		auto hull = Convex_Hull(v);
-		double area = rotating_calipers(hull);
+		vector <point <double>> v(n);
+		for(auto &e:v) 
+			cin >> e;
+		double area = PG::minimum_bounding_box(v);
 		cout<<fixed<<setprecision(4)<<area<<'\n';
 	}
 	return 0;

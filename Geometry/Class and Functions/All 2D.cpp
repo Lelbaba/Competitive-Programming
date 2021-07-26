@@ -1,9 +1,19 @@
 #include <bits/stdc++.h>
-using namespace std;
+#define monke_flip ios_base::sync_with_stdio(false); cin.tie(NULL);
+#define random_monke srand(chrono::system_clock::now().time_since_epoch().count());
+#ifdef LEL
+#include <dbg.h>
+#else
+#define dbg(...) {/* temon kichu na; */}
+#endif
 
+using namespace std;
+using ll = long long;
+const int MONKE = 0;
 
 const double PI = acos(-1), EPS = 1e-10;
 #define sq(x) (x)*(x)
+template <typename DT> int dcmp(DT x) { return fabs(x) < EPS ? 0 : (x<0 ? -1 : 1);}
 
 template <typename DT> 
 class point{
@@ -11,6 +21,7 @@ class point{
         DT x,y;
     point() = default;
     point(DT x, DT y): x(x), y(y) {};
+    template <typename X> point(point <X> p): x(p.x), y(p.y) {};
     
     point operator + (point rhs) const { return point(x + rhs.x, y + rhs.y); }
     point operator - (point rhs) const { return point(x - rhs.x, y - rhs.y); }
@@ -30,15 +41,78 @@ class point{
     friend DT dis_sq(point a, point b){ return sq(a.x-b.x) + sq(a.y-b.y); }
     friend DT tri_area(point a,point b, point c){ return (b-a) & (c-a); }
     friend double angle(point u) { return atan2(u.y, u.x); }
-    friend int dcmp(DT x) { return fabs(x) < EPS ? 0 : (x<0 ? -1 : 1);}
     friend double angle(point a, point b) {
         double ans = angle(b) - angle(a);
         return ans <= -PI ? ans + 2*PI : (ans > PI ? ans - 2*PI : ans);
     }
 };
+template <typename DT> 
+class polarComp {
+    point <DT> O, dir;
+    bool half(point  <DT> p) {
+        return dcmp(dir & p) < 0 || (dcmp(dir & p) == 0 && dcmp(dir ^ p) > 0);
+    }
+    public:
+    polarComp(point <DT> O = point(0, 0), point <DT> dir = point(1, 0))
+        : O(O), dir(dir) {}
+  
+    bool operator() (point <DT>p, point <DT> q) {
+        return make_tuple(half(p), 0) < make_tuple(half(q), (p & q));
+    }
+};
 
+template <typename DT>
+class line{
+    public:
+        point <DT> dir, O; // direction of vector and starting point
+    line(point <DT> p,point <DT> q): dir(q-p), O(p) {};
+
+    bool contains(point <double> p){ 
+        return fabs(p - O & dir ) < EPS;
+    } // checks whether the line contains a certain point
+    template <typename XT> point <XT> at(XT t){
+        return point <XT> (dir) * t + O;
+    } // inserts value of t in the vector representation, finds the point which is O + Dir*t
+    double inv_at(point <double> p){
+        assert(contains(p));
+        return (p - O).x / dir.x;
+    } // if the line contains a point, gives the value t such that, p = O+Dir*t
+    line perp(point <DT> p){
+        return line(p, p + (-dir.y,dir.x));
+    }
+    friend bool parallel(line& L, line& R){
+        return fabs(R.dir & L.dir) < EPS;
+    }
+    friend int intersects(line& L, line& R){
+        return parallel(L, R) ? R.contains(L.O) ? -1 : 0 : 1;
+    }
+    friend pair <double, double> intersection_at(line &L, line &R){
+        double r = double((L.O - R.O) & L.dir)/(R.dir & L.dir);
+        double l = double((R.O - L.O) & R.dir)/(L.dir & R.dir);
+        return {l, r};
+    }
+    friend pair <int, point<double>> intersection_point(line L, line R,int _L = 0, int _R = 0){
+        int ok = intersects(L, R);
+        if(ok == 0)
+            return {0, {0, 0}};
+        if(ok == 1){
+            auto [l,r] = intersection_at(L, R);
+            if(l < (0-EPS) and _L & 2 )
+                return {0, {0, 0}};
+            if(l > (1+EPS) and _L & 1)
+                return {0, {0, 0}};
+            if(r < (0-EPS) and _R & 2 )
+                return {0, {0, 0}};
+            if(r > (1+EPS) and _R & 1)
+                return {0, {0, 0}};
+            return {1, L.at(l)};
+        }
+        return {-1, {0,0}}; // unsettled case, probably lagbe na
+    }
+};
 template <typename DT> using polygon = vector <point <DT>>; 
-namespace PG{
+
+namespace polygon_algo{
     template <typename DT> polygon <DT> Convex_Hull(polygon <DT> &PT){
         sort(PT.begin(), PT.end());
         int m = 0, n = PT.size();
@@ -59,10 +133,10 @@ namespace PG{
         return hull;
     }
 
-    template <typename DT> DT minimum_bounding_box(polygon <DT> P){
+    template <typename DT> double minimum_bounding_box(polygon <DT> P){
         auto p = Convex_Hull(P);
         int n = p.size();
-        DT area = 1e20 + 5;
+        double area = 1e20 + 5;
         for(int i = 0, l = 1, r = 1, u = 1 ;   i < n ;   i++){
             point <DT> edge = (p[(i+1)%n]- p[i])/sqrt(dis_sq(p[i], p[(i+1)%n]));
 
@@ -78,7 +152,7 @@ namespace PG{
             area = 0;
         return area;
     }
-    template <typename DT> DT farthest_pair_of_points(polygon <DT> p){
+    template <typename DT> DT farthest_pair_of_points_sq(polygon <DT> p){
         p = Convex_Hull(p);
         int n = p.size();
         DT ans = -1e9;
@@ -88,19 +162,16 @@ namespace PG{
             ans = max(ans, dis_sq(p[i], p[j]));
             ans = max(ans, dis_sq(p[(i+1)%n], p[j]));
         }
-        return ans;
+        return ans; // will return square of the answer.
     }
-};
+}
 
 int main()
 {
-	int n;
-	ios_base::sync_with_stdio(false); cin.tie(NULL);
-	cin >> n;
-	polygon <int> V(n);
-	for(auto &x:V)
-		cin >> x;
-	double ans = sqrt(PG::farthest_pair_of_points(V));
-	cout << fixed << setprecision(8) << ans << '\n';
-	return 0;
+    monke_flip
+    point <int> A(0,0), B(2,2), C(5,0), D(0,5), I;
+    line <double> AB(A,B), CD(C,D);
+    auto [parbe,bindu] = intersection_point(AB, CD,2, 3);
+    cout << bindu; 
+    return MONKE;
 }

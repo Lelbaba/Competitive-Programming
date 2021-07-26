@@ -10,134 +10,219 @@
 using namespace std;
 using ll = long long;
 const int MONKE = 0;
-template <typename DT>
-class vertex{
+/*
+        segment tree class merely handles segment tree operations
+        and the attempt here is to employ it in such a way that
+        there would be no need to change that part of the code
+
+        vertex class needs to handle everything that a segment tree 
+        needs.
+        VT, DT, LT are the vertex class, query return type, and update type
+        respectively
+
+        requirements from the vertex class:
+        a constructor that takes the query return type as an argument
+        a lazy value that contains update types
+        member functions:
+        apply:
+            given an update type and range of the node, it will apply the update 
+            to a node
+        reset:
+            will clear all pending operations in lazy
+        merge:
+            given child nodes, will combine them to form the current node
+        get:
+            given two results of queries from child node and current range
+            will give the result for this node
+        ans:
+            in the case of a leaf, will give the result
+
+        ostream must be defined to use check
+
+*/
+
+class range_sum{
+    // horrible queries
     public:
-        DT val, lazy, iden = 0;
-        int l, r, state = -1;
-    vertex(DT _val = 0, DT _lazy = 0){
-        // default values should be the identity 
-        val = _val, lazy = _lazy;
+        ll val = 0, lazy;
+        const static ll I = 0;
+    range_sum() = default;
+    range_sum(ll v) : val(v), lazy(0) {}
+    void apply(ll up, int s, int e){
+        val += up * (e-s+1);
+        lazy += up;
     }
-    DT add(DT a,DT b){
-        return a+b;
+    void reset(){
+        lazy = 0;
     }
-    DT repeat(DT a){
-        return a*(r-l+1);
+    void merge(range_sum &a, range_sum &b){
+        val = a.val + b.val;
     }
-    void base_state(DT x){
-        val = x;
-        state = 0;
+    ll get(ll a, ll b, int s, int e){
+        return a + b;
     }
-    void base_update(DT x){
-        lazy = add(lazy,x);
-        val = add(val,repeat(x));
-    }
-    void merge(vertex L,vertex R){
-        if(state == -1)
-            state = 0;
-        val = add(add(L.val,R.val),repeat(lazy));
-    }
-    void propogate(vertex& L,vertex& R){
-        L.base_update(lazy);
-        R.base_update(lazy);
-        lazy = iden;
-    }
-    DT ans(){
+    ll ans(){
         return val;
     }
+    friend ostream& operator << (ostream& o, range_sum &a){
+        o << "val = "<< a.val << "\nlazy = " << a.lazy << '\n';
+        return o;
+    }
 };
 
-template <typename VT, typename DT>
-class lazy_segment_tree
+class pirate_counter{
+    // AHOY PIRATES
+    const static char one = 'F', zero = 'E', invert = 'I', query = 'S';
+    public:
+        static const int I = 0; 
+        int val = I;
+        char lazy;
+    pirate_counter() = default;
+    pirate_counter(int val, char lazy = 0) : val(val), lazy(lazy){} //lazy should be applicable like an update
+
+    void apply(char c, int s, int e){ 
+        if(c == one){
+            val = e - s + 1;
+            lazy = one;
+        } else if(c == zero){
+            val = 0;
+            lazy = zero;
+        } else if(c == invert){
+            val = e - s + 1 - val;
+            if(lazy == one)
+                lazy = zero;
+            else if(lazy == zero)
+                lazy = one;
+            else if(lazy == invert)
+                lazy = 0;
+            else 
+                lazy = invert;
+        }
+    }
+    void reset(){
+        lazy = 0;
+    }
+    void merge(pirate_counter &A, pirate_counter &B){
+        val = A.val + B.val;
+    }
+    int get(int a, int b, int s = 0,int e = 0){
+        return a+b;
+    }
+    int ans(){
+        return val;
+    }
+    friend ostream& operator << (ostream &os, const pirate_counter& v){
+        os << "val = " << v.val << '\n';
+        os << "lazy = " << v.lazy << '\n';
+        return os;
+    } 
+};
+
+
+template <typename VT, typename DT, typename LT>
+class segment_tree
 {
     public:
-        int n;
+        int n, counter = 1;
         vector <VT> tree;
-        vector <DT> arr;
-        VT tem;
-
-    lazy_segment_tree(vector <DT> &v){
-        n = v.size();
-        arr = v;
-        tree.resize(n*4);
-        build();
+    segment_tree(int n): n(n), tree(n<<2) {};
+    void propogate(int s, int e, int node){
+        if(s == e)
+            return;
+        tree[node*2].apply(tree[node].lazy, s, s+e>>1);
+        tree[node*2+1].apply(tree[node].lazy, s+e+2>>1, e);
+        tree[node].reset();
     }
-    void build(){
-        build(0,n-1);
-    }
-    void build(int l,int r,int node = 1){
-        tree[node].l = l, tree[node].r = r;
-        if(l==r){
-            tree[node].base_state(arr[l]);
-        } else{
-            int m = l+(r-l)/2;
-            build(l,m,node*2);
-            build(m+1,r,node*2+1);
-            tree[node].merge(tree[node*2],tree[node*2+1]);
-        }
-    }
-
-    void update(DT uval,int ul,int ur, int node = 1){
-        int l = tree[node].l, r = tree[node].r;
-
-        if(ul>ur){
+    void build(int s, int e, vector <DT> &v, int node = 1 ){
+        int m = s + e >> 1;
+        if(s == e){
+            tree[node] = VT(v[s]);
             return;
         }
-        if(l==ul and r==ur){
-            tree[node].base_update(uval); 
-        } else {
-            int m = (r+l)/2, _ul = max(ul,m+1), _ur = min(ur,m);
-
-            update(uval,ul, _ur,node*2);
-            update(uval,_ul,ur, node*2+1);
-
-            tree[node].merge(tree[node*2],tree[node*2+1]);
-        }
+        build(s, m, v, node * 2);
+        build(m+1, e, v, node*2+1);
+        tree[node].merge(tree[node*2], tree[node*2+1]);
     }
-
-    DT query(int ql,int qr,int node  = 1){
-        int l = tree[node].l, r = tree[node].r;
-
-        if(ql>qr){
-            return tem.iden;
+    void update(int S,int E, LT uval, int s, int e, int node = 1){
+        propogate(s, e, node);
+        int m = s + e >> 1;
+        if(S>E)
+            return;
+        if(S == s and E == e){
+            tree[node].apply(uval, s, e);
+            return;
         }
-        if(l==ql && r==qr){
+        update(S,   min(m,E), uval,  s,  m, node * 2);
+        update(max(S,m+1), E, uval, m+1, e, node * 2 + 1);
+        tree[node].merge(tree[node*2], tree[node*2+1]);
+    }
+    DT query(int S, int E, int s, int e, int node = 1){
+        propogate(s, e, node);
+        int m = s + e >> 1;
+        if(S>E)
+            return VT::I;
+        if(s == S and e == E)
             return tree[node].ans();
-        }
+        DT L = query(S, min(m,E), s, m, node*2);
+        DT R = query(max(S,m+1), E, m+1, e, node*2+1);
+        return tree[node].get(L, R, s, e);
+    }
+    void chk(int s, int e, int node = 1){
+        int m = s+e >> 1;
+        cerr << ".........................\n";
+        cerr << "RANGE : " << s <<" - "<< e <<'\n';
+        cerr << tree[node] << '\n';
+        if(s == e) 
+            return ;
+        chk(s,m,node*2);
+        chk(m+1,e,node*2+1);
 
-        tree[node].propogate(tree[node*2],tree[node*2+1]);
-
-        int m = l + (r-l)/2, _ql = max(ql,m+1), _qr = min(qr,m);
-        return tem.add(query(ql, _qr, node*2),
-                   query(_ql,qr, node*2+1));
-    }  
+    }
+    void check(int s, int e){
+        cerr << "\n\n";
+        cerr <<"........ Commencing Check : "<< counter++ << " ........\n";
+        chk(s, e);
+    }
 };
 
+void solve(){
+    string pirates, tem;
+    int M, T;
+    cin >> M;
+    for(int i = 0; i< M; i++){
+        cin >> T >> tem;
+        for(int j = 0; j < T; j++)
+            pirates += tem;
+    }
+    int n = pirates.size();
+    segment_tree < pirate_counter ,int, char> Tree(n);
+    vector <int> prt(n);
+    for(int i = 0; i < n; i++)
+        prt[i] = pirates[i] - '0';
+
+    Tree.build(0,n-1,prt);
+    cin >> T;
+    //Tree.check(0,n-1);
+    for(int i = 0, l, r, q = 1; i< T; i++){
+        char ch;
+        cin >> ch >> l >> r;
+        if(ch == 'S'){
+            cout <<'Q'<<q++<<": " <<Tree.query(l,r,0,n-1)<<'\n';
+            //Tree.check(0, n-1);
+        } else {
+            Tree.update(l,r,ch, 0, n-1);
+            //Tree.check(0,n-1);
+        }
+    }
+}
 int main()
 {
     monke_flip
-    int T;
-    cin>>T;
-    for(int tc=1;tc<=T;tc++){
-        int n,q;
-        cin>>n>>q;
-        cout<<"Case "<<tc<<":\n";
-        vector <ll> v(n);
-        lazy_segment_tree<vertex<ll>, ll> T(v);
-        for(int i=0;i<q;i++){
-            int type,l,r;
-            ll val;
-            cin>>type;
-            if(type == 0){
-                cin>>l>>r>>val;
-                T.update(val,l,r);
-            } else{
-                cin>>l>>r;
-                ll ans = T.query(l,r);
-                cout<<ans<<'\n';
-            }
-        }
+    int t = 1; 
+    cin>>t;
+    for(int tc=1; tc<=t; tc++){
+        cout << "Case "<<tc<<":\n";
+        solve();
     }
     return MONKE;
 }

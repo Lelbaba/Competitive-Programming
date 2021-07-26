@@ -3,6 +3,51 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 const double eps = 1e-9;
+template <typename DT> 
+class point{
+    public:
+        DT x,y;
+    point() = default;
+    point(DT x, DT y) : x(x), y(y) {};
+    point operator + (point rhs) {
+        return point(x+rhs.x,y+rhs.y);
+    }
+    point operator - (point rhs){
+        return point(x-rhs.x,y-rhs.y);
+    }
+    point operator * (DT M){
+        return point(M*x,M*y);
+    }
+    point operator / (DT M){
+        return point(x/M,y/M);
+    }
+    bool operator < (point rhs) const {
+        return x<rhs.x|| (x==rhs.x && y<rhs.y);
+    }
+    point operator == (point rhs) const {
+        return x == rhs.x and y == rhs.y;
+    } 
+    DT operator & (point rhs){
+        return (x*rhs.y- y*rhs.x);      // cross product
+    }
+    DT operator ^ (point rhs){
+        return x*rhs.x + y*rhs.y;       // dot product 
+    }
+    friend DT dis_sq(point a, point b){
+        return (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y);
+    }
+    friend DT tri_area(point a,point b, point c){
+        return (b-a) & (c-a);
+    }
+    friend istream& operator >> (istream& in, point &p){
+        in >> p.x >> p.y;
+        return in;
+    }
+    friend ostream& operator << (ostream& out, point p){
+        out << p.x << ' ' << p.y;
+        return out;
+    }
+};
 template <typename DT>
 class line{
     public:

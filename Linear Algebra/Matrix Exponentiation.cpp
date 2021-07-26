@@ -26,6 +26,9 @@ class Matrix
 		}
 	}
 
+    vector <long long>& operator[] (int idx){
+        return data[idx];
+    }
 	void make_unit(){
 		for(int i=0; i<size; i++) for(int j=0; j<size; j++) data[i][j] = (i==j);
 	}

@@ -82,6 +82,7 @@ int main()
         scanf("%d%d", &n,&m);
         vector <ll> v(n);
         segment_tree T(v);
+
         for(int i=0;i<m;i++){
             int type,l,r;
             ll val;
