@@ -61,10 +61,41 @@ class range_sum{
     ll get(ll a, ll b, int s, int e){
         return a + b;
     }
-    ll ans(){
+    ll ans(int s){
         return val;
     }
     friend ostream& operator << (ostream& o, range_sum &a){
+        o << "val = "<< a.val << "\nlazy = " << a.lazy << '\n';
+        return o;
+    }
+};
+
+class range_frequency{
+    //CF 1555 E
+    public:
+        ll val = 0, lazy, cnt = 0;
+        const static ll I = 1;
+    range_frequency() = default;
+    range_frequency(ll v) : val(v), lazy(0) {}
+    void apply(ll up, int s, int e){
+        lazy += up;
+        cnt += up;
+        val = cnt > 0;
+    }
+    void reset(){
+        lazy = 0;
+    }
+    void merge(range_frequency &a, range_frequency &b, int s, int e){
+        cnt = min(a.cnt,b.cnt);
+        val = a.val & b.val;
+    }
+    ll get(ll a, ll b, int s, int e){
+        return a & b;
+    }
+    ll ans(int s){
+        return val;
+    }
+    friend ostream& operator << (ostream& o, range_frequency &a){
         o << "val = "<< a.val << "\nlazy = " << a.lazy << '\n';
         return o;
     }
@@ -102,13 +133,13 @@ class pirate_counter{
     void reset(){
         lazy = 0;
     }
-    void merge(pirate_counter &A, pirate_counter &B){
+    void merge(pirate_counter &A, pirate_counter &B, int s, int e){
         val = A.val + B.val;
     }
     int get(int a, int b, int s = 0,int e = 0){
         return a+b;
     }
-    int ans(){
+    int ans(int s){
         return val;
     }
     friend ostream& operator << (ostream &os, const pirate_counter& v){
@@ -123,9 +154,10 @@ template <typename VT, typename DT, typename LT>
 class segment_tree
 {
     public:
-        int n, counter = 1;
+        int L, R, counter = 1;
         vector <VT> tree;
-    segment_tree(int n): n(n), tree(n<<2) {};
+    segment_tree(int n): L(0), R(n-1), tree(n<<2) {}
+    segment_tree(int s, int e): L(s), R(e), tree(e-s+1 << 2) {}
     void propogate(int s, int e, int node){
         if(s == e)
             return;
@@ -133,6 +165,12 @@ class segment_tree
         tree[node*2+1].apply(tree[node].lazy, s+e+2>>1, e);
         tree[node].reset();
     }
+    
+    void build(vector <DT> &v)      { build(L, R, v);           }
+    void update(int S, int E, LT U) { update(S, E, U, L, R);    }
+    DT query(int S, int E)          { return query(S, E, L, R); }
+    void check()                    { return check(L, R);       }
+
     void build(int s, int e, vector <DT> &v, int node = 1 ){
         int m = s + e >> 1;
         if(s == e){
@@ -141,7 +179,7 @@ class segment_tree
         }
         build(s, m, v, node * 2);
         build(m+1, e, v, node*2+1);
-        tree[node].merge(tree[node*2], tree[node*2+1]);
+        tree[node].merge(tree[node*2], tree[node*2+1], s, e);
     }
     void update(int S,int E, LT uval, int s, int e, int node = 1){
         propogate(s, e, node);
@@ -154,7 +192,7 @@ class segment_tree
         }
         update(S,   min(m,E), uval,  s,  m, node * 2);
         update(max(S,m+1), E, uval, m+1, e, node * 2 + 1);
-        tree[node].merge(tree[node*2], tree[node*2+1]);
+        tree[node].merge(tree[node*2], tree[node*2+1], s, e);
     }
     DT query(int S, int E, int s, int e, int node = 1){
         propogate(s, e, node);
@@ -162,7 +200,7 @@ class segment_tree
         if(S>E)
             return VT::I;
         if(s == S and e == E)
-            return tree[node].ans();
+            return tree[node].ans(s);
         DT L = query(S, min(m,E), s, m, node*2);
         DT R = query(max(S,m+1), E, m+1, e, node*2+1);
         return tree[node].get(L, R, s, e);
@@ -202,16 +240,16 @@ void solve(){
 
     Tree.build(0,n-1,prt);
     cin >> T;
-    //Tree.check(0,n-1);
+    Tree.check(0,n-1);
     for(int i = 0, l, r, q = 1; i< T; i++){
         char ch;
         cin >> ch >> l >> r;
         if(ch == 'S'){
             cout <<'Q'<<q++<<": " <<Tree.query(l,r,0,n-1)<<'\n';
-            //Tree.check(0, n-1);
+            Tree.check(0, n-1);
         } else {
             Tree.update(l,r,ch, 0, n-1);
-            //Tree.check(0,n-1);
+            Tree.check(0,n-1);
         }
     }
 }

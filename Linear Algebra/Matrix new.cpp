@@ -11,34 +11,37 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 
+tuple <ll,ll,ll> EGCD(ll a, ll b){
+    if(b == 0) return {1, 0, a};
+    else{
+        auto [x,y,g] = EGCD(b, a%b);
+        return {y, x - a/b*y,g};
+    }
+}
+ll inv_mod(ll a, ll m){
+    auto [x,y,g] = EGCD(a, m);
+    assert(g == 1);
+    return (x%m + m)%m
+}
 class modulo_int{
     public:
         ll val;
-        static const ll mod = 1e9+7;
+        static const ll mod = 1e9+7; // don't use if it isn't a prime, careful of overflow
 
     modulo_int(ll _val = 0){
         val = _val > 0 ? _val%mod : _val%mod + mod;
     }
 
-    ll inv_mod(ll a, ll m){
-        ll _m = m, q, t, x, y;
-        if (m == 1) return 0;
-        for (y = 0, x = 1; a>1; y = x-q*y, x = t) {
-            q = a/m, t = m;
-            m = a%m, a = t;
-            t = y;
-        }
-        return x < 0 ? x+_m: x;
-    }
     modulo_int operator + (modulo_int rhs){ return modulo_int((val + rhs.val)); }
     modulo_int operator - (modulo_int rhs){ return modulo_int((val - rhs.val)); }
-    modulo_int operator * (modulo_int rhs){ return modulo_int((val*rhs.val)); }
-    modulo_int operator / (modulo_int rhs){ return modulo_int((val*inv_mod(rhs.val, mod)));}
+    modulo_int operator * (modulo_int rhs){ return modulo_int((val * rhs.val)); }
+    modulo_int operator / (modulo_int rhs){ return modulo_int( binpow(rhs, mod-2) * val);}
 
     void operator += (modulo_int rhs){ *this = *this + rhs; }
     void operator -= (modulo_int rhs){ *this = *this - rhs; }
     void operator *= (modulo_int rhs){ *this = *this * rhs; }
     void operator /= (modulo_int rhs){ *this = *this / rhs; }
+
     friend modulo_int binpow (modulo_int val, ll p){
         modulo_int ans = 1;
         for(;p>0; p>>=1){

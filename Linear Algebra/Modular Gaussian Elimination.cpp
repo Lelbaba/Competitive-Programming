@@ -3,7 +3,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
-const int INF = 2; // it doesn't actually have to be infinity or a big number
 const ll mod = 998244353;
 int D[][2] = {
 	{1,0},
@@ -11,25 +10,100 @@ int D[][2] = {
 	{0,1},
 	{0,-1}
 };
-ll gcd(ll a, ll b, ll& x, ll& y) {
-    if (b == 0) {
-        x = 1;
-        y = 0;
-        return a;
+struct modulo_int{
+    ll val;
+    static const ll mod = 998244353; // don't use if it isn't a prime, careful of overflow
+    modulo_int(ll _val = 0){
+        val = _val > 0 ? _val%mod : _val%mod + mod;
     }
-    ll x1, y1;
-    ll d = gcd(b, a % b, x1, y1);
-    x = y1;
-    y = x1 - y1 * (a / b);
-    return d;
-}
-ll inv(ll n){
-	ll x,y;
-	ll g = gcd(n,mod,x,y);
-	return ((x%mod+mod)%mod);
-}
+    modulo_int operator + (modulo_int rhs){ return modulo_int((val + rhs.val)); }
+    modulo_int operator - (modulo_int rhs){ return modulo_int((val - rhs.val)); }
+    modulo_int operator * (modulo_int rhs){ return modulo_int((val * rhs.val)); }
+    modulo_int operator / (modulo_int rhs){ return modulo_int( binpow(rhs, mod-2) * val);}
 
-int modular_gauss (vector < vector<ll> > a, vector<ll> & ans) {
+    void operator += (modulo_int rhs){ *this = *this + rhs; }
+    void operator -= (modulo_int rhs){ *this = *this - rhs; }
+    void operator *= (modulo_int rhs){ *this = *this * rhs; }
+    void operator /= (modulo_int rhs){ *this = *this / rhs; }
+    friend modulo_int binpow (modulo_int val, ll p){
+        modulo_int ans = 1;
+        for(;p>0; p>>=1){
+            if(p&1) ans = ans*val;
+            val *= val;
+        }
+        return ans;
+    }
+};
+template <typename TYPE> struct Matrix {
+    int n, m;
+    vector <vector <TYPE>> dt;
+    Matrix(int n = 1, int m = 1): n(n), m(m) {
+        dt.assign(n, vector <TYPE> (m));
+    };
+    Matrix(vector <vector <TYPE>> dt): n(dt.size()), m(dt[0].size()), dt(dt) {};
+    vector <TYPE>& operator[] (int idx){
+        return dt[idx];
+    }
+    Matrix(vector <TYPE> d): n(1), m(d.size()), dt({d}) {};
+    template <typename D> void operator = (vector <vector <D>> v){
+        assert(!v.empty());
+        n = v.size(), m = v[0].size();
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < m; j++)
+                dt[i][j] = TYPE(v[i][j]);
+    }
+    Matrix operator * (Matrix& R){ //Matrix multiplication
+        assert(m == R.n);
+        Matrix ans (n, R.m);
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < R.m; j++)
+                for (int k = 0; k < m; k++)
+                    ans[i][j] += dt[i][k] * R.dt[k][j];
+        return ans;
+    } 
+    void operator *= (Matrix &R){
+        *this = *this * R;
+    }
+    // Matrix Transpose
+    Matrix operator ~ (){
+        Matrix ans(m,n);
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < m; j++)
+                ans.dt[j][i] = dt[i][j];
+        return ans;
+    }
+    // makes the matrix unit
+    void unit(){
+        assert(n == m);
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < n; j++)
+                dt[i][j] = (i == j);
+    }
+    //applies linear transformation on a vector
+    vector <TYPE> apply(vector <TYPE> V){
+        Matrix A(V);
+        A = (~A);
+        A = ~(*this*A);
+        return A[0];
+    }
+    friend Matrix binpow(Matrix R, long long pow){
+        assert(R.n == R.m);
+        Matrix ans(R.n, R.n);
+        ans.unit();
+        for( ; pow > 0; pow >>= 1, R*= R){
+            if(pow & 1)
+                ans *= R;
+        }
+        return ans;
+    }
+};
+const double EPS = 1e-9;
+const int INF = 2; // it doesn't actually have to be infinity or a big number
+
+ll abs(modulo_int a){
+	return abs(a.val);
+}
+template <typename dt> int gauss (vector < vector<dt> > a, vector<dt> & ans) {
     int n = (int) a.size();
     int m = (int) a[0].size() - 1;
 
@@ -39,7 +113,7 @@ int modular_gauss (vector < vector<ll> > a, vector<ll> & ans) {
         for (int i=row; i<n; ++i)
             if (abs (a[i][col]) > abs (a[sel][col]))
                 sel = i;
-        if (a[sel][col] == 0)
+        if (abs (a[sel][col]) < EPS)
             continue;
         for (int i=col; i<=m; ++i)
             swap (a[sel][i], a[row][i]);
@@ -47,9 +121,9 @@ int modular_gauss (vector < vector<ll> > a, vector<ll> & ans) {
 
         for (int i=0; i<n; ++i)
             if (i != row) {
-                ll c = ((a[i][col] *inv(a[row][col]))%mod + mod)%mod;
+                double c = a[i][col] / a[row][col];
                 for (int j=col; j<=m; ++j)
-                    a[i][j] = ((a[i][j] - (a[row][j] * c)%mod)%mod +mod)%mod;
+                    a[i][j] -= a[row][j] * c;
             }
         ++row;
     }
@@ -57,12 +131,12 @@ int modular_gauss (vector < vector<ll> > a, vector<ll> & ans) {
     ans.assign (m, 0);
     for (int i=0; i<m; ++i)
         if (where[i] != -1)
-            ans[i] = ((a[where[i]][m] * inv(a[where[i]][i])%mod)+mod)%mod;
+            ans[i] = a[where[i]][m] / a[where[i]][i];
     for (int i=0; i<n; ++i) {
-        ll sum = 0;
+        dt sum = 0;
         for (int j=0; j<m; ++j)
-            sum = (sum+(ans[j] * a[i][j])%mod+mod)%mod;
-        if (sum != a[i][m])
+            sum += ans[j] * a[i][j];
+        if (abs (sum - a[i][m]) > EPS)
             return 0;
     }
 

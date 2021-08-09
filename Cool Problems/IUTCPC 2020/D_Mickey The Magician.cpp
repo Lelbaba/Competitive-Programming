@@ -1,71 +1,62 @@
 #include <bits/stdc++.h>
+#define monke_flip ios_base::sync_with_stdio(false); cin.tie(NULL);
+#define random_monke chrono::system_clock::now().time_since_epoch().count()
+#ifdef LEL
+#include <dbg.h>
+#else
+#define dbg(...) {/* temon kichu na; */}
+#endif
+
 using namespace std;
 using ll = long long;
-ll gooddays(vector <ll> &potion){
-	ll last = ll(potion.size())-1;
+const int MONKE = 0;
 
-	set <ll> after;
 
-	vector <bool> day(last+1);
-	vector <bool> night(last+1);
-	vector <ll> day_next(last+1);
-	vector <ll> night_next(last+1);
-	map <ll,ll> min_next;
-	after.insert(potion[last]); 
-	min_next[potion[last]] = last;
-	ll good = 1;
-	day[last] = true;
-	night[last] = true;
-	for(ll i = last-1; i>=0;i--){
-		auto it = lower_bound(after.begin(),after.end(),potion[i]);
-		if(it == after.end()) day[i] = false;
-		else{
-			day_next[i] = min_next[*it];
-			day[i] = night[day_next[i]];
-			if(day[i]) good++;
-		}
-		if(*it>potion[i] && it == after.begin()) night[i] = false;
-		else{
-			if(*it>potion[i]) it--;
-			night_next[i] = min_next[*it];
-			night[i] = day[night_next[i]];
-		}
-		min_next[potion[i]] = i;
-		after.insert(potion[i]);
-	}
-	return good;
+void solve(){
+    int n;
+    cin >> n;
+    vector <int> v(n), night(n, -1), day(n, -1), pref(n), suf(n);
+    for(auto &e:v){
+        cin >> e;
+    }
+    map <int,int> visited;
+    int k = 1;
+    visited[v[n-1]] = day[n-1] = night[n-1] = n-1; 
+    for(int i = n-2; i >= 0; i--){
+        auto greater = visited.lower_bound(v[i]);
+        if(greater != visited.end())
+            day[i] = night[greater -> second];
+        auto smaller = visited.upper_bound(v[i]);
+        if(smaller != visited.begin())
+            night[i] = day[prev(smaller) -> second];
+        visited[v[i]] = i;
+        k += day[i] != -1;
+    }
+    partial_sum(v.begin(), v.end(), pref.begin());
+    partial_sum(v.rbegin(), v.rend(), suf.rbegin());
+    
+    ll MAX = 0, low = 0;
+    for(auto e:pref){
+        MAX = max(MAX, e - low);
+        low = min((ll) e, low);
+    }
+    
+    if(k > 1){
+        ll pref_max = max(0, *max_element(pref.begin(),pref.end()));
+        ll suf_max = max(0, *max_element(suf.begin(), suf.end()));
+
+        MAX = max( pref_max + suf_max +  max(0ll, (ll) pref[n-1] * (k-2)),  MAX ); 
+    }
+    cout << MAX << '\n';
 }
 
 int main()
 {
-	int t;
-	cin>>t;
-	while(t--){
-		ll n;
-		cin>>n;
-		vector <ll> v(n);
-		for(auto &x:v) cin>>x;
-		ll k = gooddays(v);
-		ll sum = 0;
-		for(auto &x:v){
-			sum+=x;
-			x=sum;
-		}
-		ll i,j;
-		ll low = 0;
-		vector <ll> MIN(n);
-		ll max_seg = 0;
-		ll pre=max(0ll,sum),suf = max(0ll,sum);
-		for(i=0;i<n;i++){
-			MIN[i] = low;
-			low = min(low,v[i]);
-			max_seg = max(v[i]-MIN[i],max_seg);
-			pre = max(pre,v[i]);
-			suf = max(suf,sum-v[i]); 
-		}
-		ll ans = max_seg;
-		if(k>1) ans = max(ans,pre+suf+(k-2)*max(0ll,sum));
-		cout<<ans<<endl;
-	}
-	return 0;
+    monke_flip
+    int t = 1; 
+    cin>>t;
+    for(int tc=1; tc<=t; tc++){
+        solve();
+    }
+    return MONKE;
 }
