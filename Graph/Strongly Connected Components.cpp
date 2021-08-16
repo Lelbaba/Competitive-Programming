@@ -3,8 +3,7 @@ using namespace std;
 using ll = long long;
 const int MONKE = 0;
 const int maxn = 1e5+5;
-class SCC
-{
+class SCC{
 	private:
 	vector <bool> vis;
 	vector <int> order, component,idx;

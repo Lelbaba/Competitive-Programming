@@ -21,7 +21,7 @@ tuple <ll,ll,ll> EGCD(ll a, ll b){
 ll inv_mod(ll a, ll m){
     auto [x,y,g] = EGCD(a, m);
     assert(g == 1);
-    return (x%m + m)%m
+    return (x%m + m)%m;
 }
 class modulo_int{
     public:
@@ -154,6 +154,16 @@ class Matrix {
         A = ~(A);
         return A[0];
     }
+    void append_column(vector <TYPE> v){
+        assert(v.size() == n);
+        m++;
+        for(int i = 0; i < n; i++)
+            dt[i].push_back(v[i]);
+    }
+    void append_row(vector <TYPE> v){
+        assert(v.size() == m);
+        n++, dt.push_back(v);
+    }
     friend Matrix binpow(Matrix R, long long pow){
         assert(R.n == R.m);
         Matrix ans(R.n, R.n);
@@ -164,6 +174,7 @@ class Matrix {
         }
         return ans;
     }
+
     friend ostream& operator << (ostream& o, Matrix& M){
         for(auto &x: M.dt){
             for(auto &y: x)

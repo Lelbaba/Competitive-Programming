@@ -12,8 +12,7 @@ const int MONKE = 0;
 
 //untested 
 
-class top_sort
-{
+class top_sort{
 public:
 	vector <vector <int> > adj;
 	vector <int> in,order;
