@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
+ll
 const double PI = acos(-1), EPS = 1e-10;
 #define sq(x) (x)*(x)
 

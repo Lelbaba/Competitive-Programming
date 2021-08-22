@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll =  long long;
+using LL =  long long;
 const int MONKE = 0;
-ll path[35][35];
+LL path[35][35];
 int input(int n){
 	int u,v;
 	memset(path,0, sizeof path);

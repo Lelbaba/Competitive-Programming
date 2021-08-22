@@ -8,8 +8,8 @@
 #endif
 
 using namespace std;
-using ll = long long;
-using ld = long double;
+using LL = long long;
+using LD = long double;
 const int MONKE = 0;
 const double eps = 1e-9;
 

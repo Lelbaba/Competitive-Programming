@@ -8,17 +8,17 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 //CF 1512 G
 
 vector <bool> prime;
-vector <ll> primes,phi;
+vector <LL> primes,phi;
 
-void seive(ll n = 1<<20){
+void seive(LL n = 1<<20){
     prime.assign(n+1,true), phi.resize(n+1);
     phi[1] = 1;
-    for(ll i=2;i<=n;i++){
+    for(LL i=2;i<=n;i++){
         if(prime[i]) {
             phi[i] = i-1;
             primes.push_back(i);

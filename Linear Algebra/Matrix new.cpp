@@ -8,27 +8,27 @@
 #endif
 #define print(x) cout << #x << ":\n";
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
-tuple <ll,ll,ll> EGCD(ll a, ll b){
+tuple <LL,LL,LL> EGCD(LL a, LL b){
     if(b == 0) return {1, 0, a};
     else{
         auto [x,y,g] = EGCD(b, a%b);
         return {y, x - a/b*y,g};
     }
 }
-ll inv_mod(ll a, ll m){
+LL inv_mod(LL a, LL m){
     auto [x,y,g] = EGCD(a, m);
     assert(g == 1);
     return (x%m + m)%m;
 }
 class modulo_int{
     public:
-        ll val;
-        static const ll mod = 1e9+7; // don't use if it isn't a prime, careful of overflow
+        LL val;
+        static const LL mod = 1e9+7; // don't use if it isn't a prime, careful of overflow
 
-    modulo_int(ll _val = 0){
+    modulo_int(LL _val = 0){
         val = _val > 0 ? _val%mod : _val%mod + mod;
     }
 
@@ -42,7 +42,7 @@ class modulo_int{
     void operator *= (modulo_int rhs){ *this = *this * rhs; }
     void operator /= (modulo_int rhs){ *this = *this / rhs; }
 
-    friend modulo_int binpow (modulo_int val, ll p){
+    friend modulo_int binpow (modulo_int val, LL p){
         modulo_int ans = 1;
         for(;p>0; p>>=1){
             if(p&1) ans = ans*val;

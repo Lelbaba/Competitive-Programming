@@ -1,3 +1,5 @@
+using LL = long long;
+using ULL = unsigned long long;
 namespace sieve{
     const int maxn = 1e7;
     vector <int> primes;
@@ -7,7 +9,7 @@ namespace sieve{
     void init(){
         fill(prime+2, prime+maxn+1, 1);
         SOD[1] = NOD[1] = phi[1] = spf[1] = 1;
-        for(ll i=2;i<=maxn;i++){
+        for(LL i=2;i<=maxn;i++){
             if(prime[i]) {
                 primes.push_back(i), spf[i] = i;
                 phi[i] = i-1;
@@ -32,17 +34,17 @@ namespace sieve{
         }
     }
     // O(lg n factorization for small numbers upto sieve)
-    map <ull,int> fast_factorize(ull n){
-        map <ull,int> ans;
+    map <ULL,int> fast_factorize(ULL n){
+        map <ULL,int> ans;
         for(;n>1;n/=spf[n])
             ans[spf[n]]++;
         return ans;
     }
     // factorization for big numbers
-    // using poullard rho might be better
-    map <ull,int> factorize(ull n){
+    // using pollard rho might be better
+    map <ULL,int> factorize(ULL n){
         int cnt = 0;
-        map <ull,int> ans;
+        map <ULL,int> ans;
         for(auto p:primes){
             if(p*p>n) break;
             for(;n%p==0;n/=p)
@@ -52,7 +54,7 @@ namespace sieve{
         return ans;
     }
     // only for large numbers
-    int number_of_div(ull n){
+    int number_of_div(ULL n){
         if(n < 1) return 0;
         auto A = factorize(n);
         int ans = 1;
@@ -60,18 +62,18 @@ namespace sieve{
             ans *= cnt+1;
         return ans;
     }
-    ull sum_of_div(ull n){
+    ULL sum_of_div(ULL n){
         if(n < 1) return 0;
-        ull ans = 1, ppow;
-        for(ull p:primes){
+        ULL ans = 1, ppow;
+        for(ULL p:primes){
             if(p*p > n) break;
             for(ppow=p; n%p==0; n/=p,ppow*=p);
             ans *=(ppow-1)/(p-1);
         }
         return n == 1 ? ans: ans*(1+n);
     }
-    ull PHI(ull n){
-        ull ans = n;
+    ULL PHI(ULL n){
+        ULL ans = n;
         for(auto [p,cnt]:factorize(n))
             ans = ans/p*(p-1); 
         return ans;

@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 const int one = 'F', zero = 'E', invert = 'I', query = 'S'; 
 

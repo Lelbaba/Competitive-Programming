@@ -2,8 +2,8 @@
 
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-const ll mod = 998244353;
+using LL = long long;
+const LL mod = 998244353;
 int D[][2] = {
 	{1,0},
 	{-1,0},
@@ -11,9 +11,9 @@ int D[][2] = {
 	{0,-1}
 };
 struct modulo_int{
-    ll val;
-    static const ll mod = 998244353; // don't use if it isn't a prime, careful of overflow
-    modulo_int(ll _val = 0){
+    LL val;
+    static const LL mod = 998244353; // don't use if it isn't a prime, careful of overflow
+    modulo_int(LL _val = 0){
         val = _val > 0 ? _val%mod : _val%mod + mod;
     }
     modulo_int operator + (modulo_int rhs){ return modulo_int((val + rhs.val)); }
@@ -25,7 +25,7 @@ struct modulo_int{
     void operator -= (modulo_int rhs){ *this = *this - rhs; }
     void operator *= (modulo_int rhs){ *this = *this * rhs; }
     void operator /= (modulo_int rhs){ *this = *this / rhs; }
-    friend modulo_int binpow (modulo_int val, ll p){
+    friend modulo_int binpow (modulo_int val, LL p){
         modulo_int ans = 1;
         for(;p>0; p>>=1){
             if(p&1) ans = ans*val;
@@ -98,9 +98,9 @@ template <typename TYPE> struct Matrix {
     }
 };
 const double EPS = 1e-9;
-const int INF = 2; // it doesn't actually have to be infinity or a big number
+const int INF = 2; // it doesn't actuaLLy have to be infinity or a big number
 
-ll abs(modulo_int a){
+LL abs(modulo_int a){
 	return abs(a.val);
 }
 template <typename dt> int gauss (vector < vector<dt> > a, vector<dt> & ans) {
@@ -147,7 +147,7 @@ template <typename dt> int gauss (vector < vector<dt> > a, vector<dt> & ans) {
 }
 int mat[30][30];
 
-vector <vector <ll> > parse_input(int &n,int &m){
+vector <vector <LL> > parse_input(int &n,int &m){
 	int i,j,k;
 	cin>>n>>m;
 	for(i=0;i<n;i++){
@@ -155,7 +155,7 @@ vector <vector <ll> > parse_input(int &n,int &m){
 			cin>>mat[i][j];
 		}
 	}
-	vector <vector <ll> > v(n*m,vector <ll> (n*m+1,0));
+	vector <vector <LL> > v(n*m,vector <LL> (n*m+1,0));
 	for(i=0;i<n;i++){
 		for(j=0;j<m;j++){
 			int key = i*m+j;
@@ -176,7 +176,7 @@ vector <vector <ll> > parse_input(int &n,int &m){
 	return v;
 }
 
-void query(vector <ll> &ans,int m){
+void query(vector <LL> &ans,int m){
 	int q,i,j;
 	cin>>q;
 	while(q--){
@@ -191,7 +191,7 @@ int main()
 	int t,n,m,q,i,j;
 	cin>>t;
 	while(t--){
-		vector <ll> ans;
+		vector <LL> ans;
 		modular_gauss(parse_input(n,m),ans);
 		query(ans,m);
 	}

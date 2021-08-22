@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
 const int N = 2e5+5;
@@ -19,14 +19,14 @@ namespace com{
     void init(){
         fact[0] = inv_fact[0] = 1;
         for(int i=1; i<=N; i++){
-            inv[i] = i == 1 ? 1 : (ll) inv[i - mod%i] * (mod/i + 1) % mod;
-            fact[i] = (ll) fact[i-1] * i % mod;
-            inv_fact[i] = (ll) inv_fact[i-1] * inv[i] % mod;
+            inv[i] = i == 1 ? 1 : (LL) inv[i - mod%i] * (mod/i + 1) % mod;
+            fact[i] = (LL) fact[i-1] * i % mod;
+            inv_fact[i] = (LL) inv_fact[i-1] * inv[i] % mod;
         }
     }
     int C(int n,int r){
         if(fact[0] != 1) init();
-        return (r < 0 or r > n) ? 0 : (ll) fact[n]*inv_fact[r] % mod * inv_fact[n-r] % mod;
+        return (r < 0 or r > n) ? 0 : (LL) fact[n]*inv_fact[r] % mod * inv_fact[n-r] % mod;
     }
 }
 int main()

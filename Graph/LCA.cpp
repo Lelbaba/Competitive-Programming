@@ -8,12 +8,12 @@
 #endif
 //CF 1540 B
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0, N = 201, K = 11;
 
-ll bigmod(ll num,ll pow,ll mod){
+LL bigmod(LL num,LL pow,LL mod){
     num = num%mod;
-    ll ans = 1;
+    LL ans = 1;
     for(;pow>0;pow>>=1){
         if(pow&1) ans = ans*num % mod;
         num = num*num % mod;
@@ -78,14 +78,14 @@ public:
     }
 };
 
-ll P[205][205];
-const ll mod = 1e9+7;
+LL P[205][205];
+const LL mod = 1e9+7;
 void calc(){
     for(int i=1;i<201; i++){
         P[i][0] = 0;
         P[0][i] = 1;
     }
-    ll half = bigmod(2,mod-2,mod);
+    LL half = bigmod(2,mod-2,mod);
     for(int i=1; i<201; i++){
         for(int j=1; j<201; j++){
             P[i][j] = (P[i][j-1] + P[i-1][j]) * half % mod; 
@@ -103,7 +103,7 @@ int main()
         cin >> u >> v;
     }
     calc();
-    ll ans = 0;
+    LL ans = 0;
     tree gach(edges);
     for(int root=1; root<=n;root++){
         gach.setup(root);

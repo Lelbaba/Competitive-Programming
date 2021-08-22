@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
 class Tree{

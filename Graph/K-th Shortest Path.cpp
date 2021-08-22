@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-using ll = long long;
 using pii = pair <long long,int>;
 
 const int MONKE = 0;
@@ -9,10 +8,11 @@ const int MONKE = 0;
 In this ques the k-th shortest path might be equal to the shortest path as well assuming k paths are equally short
 some varients may require that n-th shortest path>(n-1)-th shortest path
 */
+using LL = long long;
 
 void K_shortest(int n,int m){
 	int st,des,k,u,v;
-	ll w;
+	LL w;
 	scanf("%d%d%d", &st,&des,&k);
 	st--,des--;
 	vector <vector<pii > > edges(n);
@@ -21,11 +21,11 @@ void K_shortest(int n,int m){
 		u--,v--;
 		edges[u].push_back({w,v});
 	}
-	vector < vector <ll> > dis(n,vector <ll> (k+1,1e8));
+	vector < vector <LL> > dis(n,vector <LL> (k+1,1e8));
 	vector <int> vis(n); 
 	priority_queue <pii ,vector <pii >, greater< pii > > q;
 
-	q.emplace(0ll,st);
+	q.emplace(0LL,st);
 	while(!q.empty()){
 		v = q.top().second, w = q.top().first;
 		q.pop();
@@ -38,7 +38,7 @@ void K_shortest(int n,int m){
 			q.emplace(w+nd.first,nd.second);
 		}
 	}
-	ll ans = dis[des][k-1];
+	LL ans = dis[des][k-1];
 	if(ans==1e8) ans = -1;
 	printf("%lld\n", ans);
 }

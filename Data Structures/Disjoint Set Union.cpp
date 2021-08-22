@@ -2,10 +2,40 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define MONKE 0
-using ll = long long;
+using LL = long long;
 using ld = long double;
 
 int par[100005];
+
+
+class DSU{
+    public:
+        vector <int> par,size;
+        // parent of each set and size of each set
+    DSU(int n){
+        for(int i=0;i<n;i++){
+            par.push_back(i);
+            size.push_back(1);
+        }
+    }
+    // ancestor
+    int Anc(int node){
+        if(par[node] == node) 
+            return node;
+        return par[node] = Anc(par[node]); 
+    }
+    bool same(int x,int y){
+        return Anc(x) == Anc(y);
+    }
+    void Union(int x,int y){
+        x = Anc(x),y = Anc(y);
+        size[x] += size[y];
+        par[y] = x;
+    }
+    int Size(int node){
+        return size[Anc(node)];
+    }
+};
 
 int root(int i){
 	if(par[i]==i) return i;

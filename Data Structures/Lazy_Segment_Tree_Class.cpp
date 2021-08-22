@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 /*
         segment tree class merely handles segment tree operations
@@ -44,11 +44,11 @@ const int MONKE = 0;
 class range_sum{
     // horrible queries
     public:
-        ll val = 0, lazy;
-        const static ll I = 0;
+        LL val = 0, lazy;
+        const static LL I = 0;
     range_sum() = default;
-    range_sum(ll v) : val(v), lazy(0) {}
-    void apply(ll up, int s, int e){
+    range_sum(LL v) : val(v), lazy(0) {}
+    void apply(LL up, int s, int e){
         val += up * (e-s+1);
         lazy += up;
     }
@@ -58,10 +58,10 @@ class range_sum{
     void merge(range_sum &a, range_sum &b){
         val = a.val + b.val;
     }
-    ll get(ll a, ll b, int s, int e){
+    LL get(LL a, LL b, int s, int e){
         return a + b;
     }
-    ll ans(int s){
+    LL ans(int s){
         return val;
     }
     friend ostream& operator << (ostream& o, range_sum &a){
@@ -70,14 +70,16 @@ class range_sum{
     }
 };
 
+rho
+
 class range_frequency{
     //CF 1555 E
     public:
-        ll val = 0, lazy, cnt = 0;
-        const static ll I = 1;
+        LL val = 0, lazy, cnt = 0;
+        const static LL I = 1;
     range_frequency() = default;
-    range_frequency(ll v) : val(v), lazy(0) {}
-    void apply(ll up, int s, int e){
+    range_frequency(LL v) : val(v), lazy(0) {}
+    void apply(LL up, int s, int e){
         lazy += up;
         cnt += up;
         val = cnt > 0;
@@ -89,10 +91,10 @@ class range_frequency{
         cnt = min(a.cnt,b.cnt);
         val = a.val & b.val;
     }
-    ll get(ll a, ll b, int s, int e){
+    LL get(LL a, LL b, int s, int e){
         return a & b;
     }
-    ll ans(int s){
+    LL ans(int s){
         return val;
     }
     friend ostream& operator << (ostream& o, range_frequency &a){
@@ -151,8 +153,7 @@ class pirate_counter{
 
 
 template <typename VT, typename DT, typename LT>
-class segment_tree
-{
+class segment_tree{
     public:
         int L, R, counter = 1;
         vector <VT> tree;

@@ -8,41 +8,32 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
-class gcd_dt{
-    public:
-        ll x,y,g;
-    gcd_dt(ll _x,ll _y,ll _g){
-        x = _x, y = _y, g = _g;
+using PLL = pair <LL,LL>;
+// given a, b will find solutions for
+// ax + by = 1
+tuple <LL,LL,LL> EGCD(LL a, LL b){
+    if(b == 0) return {1, 0, a};
+    else{
+        auto [x,y,g] = EGCD(b, a%b);
+        return {y, x - a/b*y,g};
     }
-};
-gcd_dt egcd(ll a,ll b){
-    if(b==0){
-        return gcd_dt(1,0,a);
-    }
-    auto tem = egcd(b,a%b);
-    return gcd_dt(tem.y, tem.x - a/b*tem.y, tem.g);
 }
-class crt_dt{
-    public:
-        ll val, mod;
-    crt_dt(ll _val = 0,ll _mod = 1){
-        mod = _mod;
-        val = _val%mod;
-        val = (val+mod)%mod;
-    }
-};
-crt_dt CRT(vector <crt_dt> &v){
-    crt_dt ans;
-    for(auto &e:v){
-        auto tem = egcd(ans.mod,e.mod);
-        if((e.val-ans.val)%tem.g != 0)
-            return crt_dt(-1,0);
-        ans = crt_dt(ans.val + tem.x*(e.val-ans.val)/tem.g % (e.mod/tem.g) * ans.mod, ans.mod*e.mod/tem.g);
+// given modulo equations, will apply CRT
+PLL CRT(vector <PLL> &v){
+    PLL ans = {0,1};
+    auto &[V, M] = ans;
+    for(auto &[val,mod]:v){
+        auto [x,y,g] = EGCD(M, mod);
+        if((val-V)%g != 0)
+            return {-1,0};
+        ans = {V + x*(val-V)/g % (mod/g) * M, M*mod/g};
+        V = (V%M + M)%M; //might be unnecessary
     }
     return ans;
 }
+
 
 int main()
 {

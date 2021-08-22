@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 const int maxn = 1e5+5;
 //LOJ 1026
@@ -102,3 +102,4 @@ int main(){
         solve();
     }
 }
+struct 

@@ -8,16 +8,16 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
 vector <bool> prime;
-vector <ll> primes;
+vector <LL> primes;
 
-void seive(ll n = 1<<20){
+void seive(LL n = 1<<20){
     prime.assign(n+1,true);
     
-    for(ll i=2;i<=n;i++){
+    for(LL i=2;i<=n;i++){
         if(prime[i]) 
             primes.push_back(i);
 
@@ -29,10 +29,10 @@ void seive(ll n = 1<<20){
     }
 }
 
-vector <pair<ll,int>> factorize(ll n){
+vector <pair<LL,int>> factorize(LL n){
 	if(primes.empty()) seive();
 	int cnt = 0;
-	vector <pair<ll,int>> ans;
+	vector <pair<LL,int>> ans;
 
 	for(auto p:primes){
 		if(p*p>n) break;

@@ -8,11 +8,11 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
 const int maxn = 1e5+5;
-ll dp[maxn][2],total = 0;
+LL dp[maxn][2],total = 0;
 int opt[maxn][2], arr[maxn],cnt[maxn];
 int N,L = 1,R = 0;
 bool vis[maxn];
@@ -28,7 +28,7 @@ void check(int idx){
 		cnt[arr[idx]]++;
 	}
 }
-ll cost(int l,int r){
+LL cost(int l,int r){
 	while(L > l) check(--L);
 	while(L < l) check(L++);
 	while(R > r) check(R--);
@@ -53,7 +53,7 @@ void conquer(int k,int l =1,int r = N,int optl = 0,int optr = N){
 	dp[mid][k] = LLONG_MAX;
 	int optm = -1;
 	for(int last = optl;last <=optr && last <mid; last++){
-		ll val = dp[last][k^1]+cost(last+1,mid);
+		LL val = dp[last][k^1]+cost(last+1,mid);
 		if(val < dp[mid][k]){
 			dp[mid][k] = val;
 			optm = last;

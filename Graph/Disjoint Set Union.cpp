@@ -2,8 +2,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define MONKE 0
-using ll = long long;
-using ld = long double;
+using LL = long long;
+using LD = long double;
 
 int par[100005];
 

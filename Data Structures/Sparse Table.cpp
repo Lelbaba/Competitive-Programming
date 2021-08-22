@@ -1,12 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
 /*
 	The problem asks - given ar array, the minimum number of distinct subsequences such that 
 	1. both end points have the same numbers
 	2. all numbers inside are greater or equal ro the points.
 	3. all numbers in the arrays are part of some subsequence.
 */
+using LL = long long;
 const int maxn = (1<<20)+5 ;
 int logs[maxn];
 

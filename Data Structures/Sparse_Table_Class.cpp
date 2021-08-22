@@ -8,7 +8,7 @@
 #endif
 
 using namespace std;
-using ll = long long;
+using LL = long long;
 const int MONKE = 0;
 
 const int maxn = (1<<20)+5 ;
@@ -25,14 +25,14 @@ void compute_logs(){
 class Sparse_Table
 {
 	public:
-		vector <vector<ll>> table; 
-		function < ll(ll,ll) > func;
-		ll identity;
+		vector <vector<LL>> table; 
+		function < LL(LL,LL) > func;
+		LL identity;
 
-	Sparse_Table(vector <ll> &v, function <ll(ll,ll)> _func, ll id){
+	Sparse_Table(vector <LL> &v, function <LL(LL,LL)> _func, LL id){
 		if(logs[2] != 1) compute_logs();
 		int sz = v.size();
-		table.assign(sz,vector <ll>(logs[sz]+1) );
+		table.assign(sz,vector <LL>(logs[sz]+1) );
 		func = _func, identity = id;
 
 		for(int j=0;j<=logs[sz];j++){
@@ -43,13 +43,13 @@ class Sparse_Table
 		}
 	}
 	// when intersection of two ranges wont be a problem like min, gcd,max
-	ll query(int l, int r){
+	LL query(int l, int r){
 		assert(r>=l);
 		int pow = logs[r-l+1];
 		return func(table[l][pow], table[r- (1<<pow) + 1][pow]);
 	}
 	// other cases like sum
-	ll Query(int l,int r){
+	LL Query(int l,int r){
 		if(l>r) return identity; 
 		int pow = logs[r - l + 1];
 		return func(table[l][pow], Query(l+(1<<pow), r));
@@ -61,18 +61,18 @@ void solve(){
 	cin>>n>>m;
 	string s;
 	cin>>s;
-	vector <ll> arr(n+1);
+	vector <LL> arr(n+1);
 	for(int i=0;i<n;i++){
 		if(s[i]=='+') arr[i+1] = arr[i] + 1;
 		else arr[i+1] = arr[i] - 1;
 	}
-	Sparse_Table MIN(arr, [](ll a,ll b){return min(a,b);}, LLONG_MAX);
-	Sparse_Table MAX(arr, [](ll a,ll b){return max(a,b);}, LLONG_MIN);
+	Sparse_Table MIN(arr, [](LL a,LL b){return min(a,b);}, LLONG_MAX);
+	Sparse_Table MAX(arr, [](LL a,LL b){return max(a,b);}, LLONG_MIN);
 	while(m--){
 		int l,r;
 		cin>>l>>r;
-		ll mn = MIN.query(0,l-1);
-		ll mx = MAX.query(0,l-1);
+		LL mn = MIN.query(0,l-1);
+		LL mx = MAX.query(0,l-1);
 		if(n>r) {
 			mn = min(mn,arr[l-1]-arr[r]+MIN.query(r+1,n));
 			mx = max(mx,arr[l-1]-arr[r]+MAX.query(r+1,n));
