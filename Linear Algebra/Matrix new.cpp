@@ -11,52 +11,42 @@ using namespace std;
 using LL = long long;
 const int MONKE = 0;
 
-tuple <LL,LL,LL> EGCD(LL a, LL b){
-    if(b == 0) return {1, 0, a};
-    else{
-        auto [x,y,g] = EGCD(b, a%b);
-        return {y, x - a/b*y,g};
-    }
-}
-LL inv_mod(LL a, LL m){
-    auto [x,y,g] = EGCD(a, m);
-    assert(g == 1);
-    return (x%m + m)%m;
-}
-class modulo_int{
-    public:
-        LL val;
-        static const LL mod = 1e9+7; // don't use if it isn't a prime, careful of overflow
+struct modulo_int {
+    LL val;
+    static const LL mod = 1e9 + 7; /* don't use if it isn't a prime, careful of overflow*/
 
-    modulo_int(LL _val = 0){
-        val = _val > 0 ? _val%mod : _val%mod + mod;
+    modulo_int(LL _val = 0) {
+        val = _val > 0 ? _val % mod : _val % mod + mod;
     }
 
-    modulo_int operator + (modulo_int rhs){ return modulo_int((val + rhs.val)); }
-    modulo_int operator - (modulo_int rhs){ return modulo_int((val - rhs.val)); }
-    modulo_int operator * (modulo_int rhs){ return modulo_int((val * rhs.val)); }
-    modulo_int operator / (modulo_int rhs){ return modulo_int( binpow(rhs, mod-2) * val);}
+    modulo_int operator + (modulo_int rhs) { return modulo_int((val + rhs.val)); }
+    modulo_int operator - (modulo_int rhs) { return modulo_int((val - rhs.val)); }
+    modulo_int operator * (modulo_int rhs) { return modulo_int((val * rhs.val)); }
+    modulo_int operator / (modulo_int rhs) { return modulo_int( binpow(rhs, mod - 2) * val);}
 
-    void operator += (modulo_int rhs){ *this = *this + rhs; }
-    void operator -= (modulo_int rhs){ *this = *this - rhs; }
-    void operator *= (modulo_int rhs){ *this = *this * rhs; }
-    void operator /= (modulo_int rhs){ *this = *this / rhs; }
+    void operator += (modulo_int rhs) { *this = *this + rhs; }
+    void operator -= (modulo_int rhs) { *this = *this - rhs; }
+    void operator *= (modulo_int rhs) { *this = *this * rhs; }
+    void operator /= (modulo_int rhs) { *this = *this / rhs; }
 
-    friend modulo_int binpow (modulo_int val, LL p){
+    friend modulo_int binpow (modulo_int val, LL p) {
         modulo_int ans = 1;
-        for(;p>0; p>>=1){
-            if(p&1) ans = ans*val;
+        for (; p > 0; p >>= 1) {
+            if (p & 1) ans = ans * val;
             val *= val;
         }
         return ans;
     }
-    friend ostream& operator << (ostream& o, modulo_int &a){
+    friend ostream& operator << (ostream& o, modulo_int &a) {
         o << a.val;
         return o;
     }
-    friend istream& operator >> (istream& o, modulo_int &a){
+    friend istream& operator >> (istream& o, modulo_int &a) {
         o >> a.val;
         return o;
+    }
+    friend LL abs(modulo_int a) {
+        return abs(a.val);
     }
 };
 template <typename TYPE>

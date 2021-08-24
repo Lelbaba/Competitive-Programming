@@ -34,7 +34,7 @@ PLL CRT(vector <PLL> &v){
     return ans;
 }
 
-
+mod
 int main()
 {
     monke_flip
