@@ -12,18 +12,20 @@ using LL = long long;
 const int MONKE = 0;
 
 class Tree{
-    public:
-        int n, time = 0, LOG = 25;
-        vector <vector <int> > adj;
-        vector <vector <int>> anc;
-        vector <int> start, finish, level, par;
+    int time = 0, LOG = 25;
+    vector <vector <int> > adj;
+    vector <vector <int>> anc;
+    vector <int> start, finish, level, par;
 
-    Tree(int n = 0) : n(n), adj(vector <vector <int>>(n)){}
-    Tree(vector <pair <int,int>> edges): n(1 + edges.size()) {
-        adj.resize(n);
-        for(auto &[u,v]: edges){
-            adj[u].push_back(v);
-            adj[v].push_back(u);
+    void setup_lifting(int node, int par) {
+        for (int v: adj[node]) {
+            if(v == par)
+                continue;
+            anc[v][0] = node;
+            level[v] = level[node] + 1;
+            for (int k=1; k<LOG; k++)     
+                anc[v][k] = anc[anc[v][k-1]][k-1];
+            setup_lifting(v, node);
         }
     }
     void call(int node, int p = -1){
@@ -38,28 +40,28 @@ class Tree{
         par[node] = p; 
         finish[node] = time++;
     }
-    void init(int root){
+public:
+    int n;
+    inline vector<int>& operator[](int u) { 
+        return adj[u]; 
+    }
+    Tree(int n = 0) : n(n), adj(n){}
+    void add_edge(int u, int v){
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    void init_timer(int root){
         start.resize(n), finish.resize(n), level.resize(n), par.resize(n);
         time = 0;
         call(root);
     }
-    int subtree_size(int node){
-        return finish[node] - start[node] + 1 >> 1;
-    }
     bool is_ancestor(int node, int par){
         return start[par] <= start[node] and finish[par] >= finish[node];
     }
-    void setup_lifting(int node, int par) {
-        for (int v: adj[node]) {
-            if(v == par)
-                continue;
-            anc[v][0] = node;
-            level[v] = level[node] + 1;
-            for (int k=1; k<LOG; k++)     
-                anc[v][k] = anc[anc[v][k-1]][k-1];
-            setup_lifting(v, node);
-        }
+    int subtree_size(int node){
+        return finish[node] - start[node] + 1 >> 1;
     }
+
     void init_lifting(int root){
         LOG = 33 - __builtin_clz(n);
         anc.assign(n, vector <int> (LOG, root));

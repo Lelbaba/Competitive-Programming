@@ -10,47 +10,42 @@
 using namespace std;
 using LL = long long;
 const int MONKE = 0;
-struct modulo_int {
+template <LL mod> struct INT_MOD {
     LL val;
-    static const LL mod = 1e9 + 7; /* don't use if it isn't a prime, careful of overflow*/
+    INT_MOD(LL val = 0): val(val >= 0 ? val % mod : val % mod + mod) {}
 
-    modulo_int(LL _val = 0) {
-        val = _val > 0 ? _val % mod : _val % mod + mod;
-    }
+    INT_MOD operator + (INT_MOD rhs) const { return INT_MOD((val + rhs.val)); }
+    INT_MOD operator - (INT_MOD rhs) const { return INT_MOD((val - rhs.val)); }
+    INT_MOD operator * (INT_MOD rhs) const { return INT_MOD((val * rhs.val)); }
+    INT_MOD operator / (INT_MOD rhs) const { return INT_MOD( binpow(rhs, mod - 2) * val);}
 
-    modulo_int operator + (modulo_int rhs) { return modulo_int((val + rhs.val)); }
-    modulo_int operator - (modulo_int rhs) { return modulo_int((val - rhs.val)); }
-    modulo_int operator * (modulo_int rhs) { return modulo_int((val * rhs.val)); }
-    modulo_int operator / (modulo_int rhs) { return modulo_int( binpow(rhs, mod - 2) * val);}
+    void operator += (INT_MOD rhs) { *this = *this + rhs; }
+    void operator -= (INT_MOD rhs) { *this = *this - rhs; }
+    void operator *= (INT_MOD rhs) { *this = *this * rhs; }
+    void operator /= (INT_MOD rhs) { *this = *this / rhs; }
 
-    void operator += (modulo_int rhs) { *this = *this + rhs; }
-    void operator -= (modulo_int rhs) { *this = *this - rhs; }
-    void operator *= (modulo_int rhs) { *this = *this * rhs; }
-    void operator /= (modulo_int rhs) { *this = *this / rhs; }
-
-    friend modulo_int binpow (modulo_int val, LL p) {
-        modulo_int ans = 1;
-        for (; p > 0; p >>= 1) {
-            if (p & 1) ans = ans * val;
-            val *= val;
-        }
+    friend INT_MOD binpow (INT_MOD val, LL p) {
+        INT_MOD ans = 1;
+        for (; p > 0; p >>= 1, val *= val)
+            if (p & 1) 
+                ans = ans * val;
         return ans;
     }
-    friend ostream& operator << (ostream& o, modulo_int &a) {
+    friend ostream& operator << (ostream& o, INT_MOD &a) {
         o << a.val;
         return o;
     }
-    friend istream& operator >> (istream& o, modulo_int &a) {
+    friend istream& operator >> (istream& o, INT_MOD &a) {
         o >> a.val;
         return o;
     }
-    friend LL abs(modulo_int a) {
+    friend LL abs(INT_MOD a) {
         return abs(a.val);
     }
 };
 int main()
 {
     monke_flip
-    
+    INT_MOD <1000000007> a;
     return MONKE;
 }

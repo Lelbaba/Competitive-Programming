@@ -67,18 +67,20 @@ public:
     vector <int> id;
     vector <edge> bridges;
     Graph tree;
-    Bridge_Tree(Graph &G): n(G.n) {
-        int idx = 0;
-        depth.assign(n,-1), id.assign(n, -1), low.resize(n);
-        find_bridges(0, G);
+    void create_tree() {
         for(auto &comp : components){
-            idx = tree.add_node();
+            int idx = tree.add_node();
             for(auto &e: comp)
                 id[e] = idx;
         }
         for(auto &[l,r]: bridges)
             tree.add_edge(id[l], id[r]);
-        dbg(components);
+    }
+    Bridge_Tree(Graph &G): n(G.n) {
+        depth.assign(n,-1), id.assign(n, -1), low.resize(n);
+        for(int i = 0; i < n; i++)
+            if(depth[i] == -1)
+                find_bridges(i, G);
     }
 };
 
@@ -94,6 +96,7 @@ void solve() {
         G.add_edge(l, r);
     }
     Bridge_Tree T(G);
+    auto x = &T.create_tree();
     int ans = 0;
     for(auto &e:T.tree.adj)
         ans += (e.size() == 1);

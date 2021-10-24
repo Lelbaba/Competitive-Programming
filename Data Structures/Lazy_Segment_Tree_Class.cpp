@@ -70,8 +70,6 @@ class range_sum{
     }
 };
 
-rho
-
 class range_frequency{
     //CF 1555 E
     public:
