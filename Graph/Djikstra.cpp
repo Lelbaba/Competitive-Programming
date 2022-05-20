@@ -2,12 +2,12 @@
 using namespace std;
 using LL = long long;
 using edge = pair <LL,LL>;
-class djikstra{
+class Djikstra{
 public:
 	LL n = -1;
 	vector <vector <edge> > adj;
 	vector <LL> D,path;
-	djikstra(vector < vector <edge> > &A,LL x){
+	Djikstra(vector < vector <edge> > &A,LL x){
 		n = A.size();
 		adj = A;
 		D.assign(n,LLONG_MAX);
@@ -46,7 +46,7 @@ int main()
 		adj[u-1].emplace_back(w,v-1);
 		adj[v-1].emplace_back(w,u-1);
 	}
-	djikstra G(adj,0);
+	Djikstra G(adj,0);
 	int r = n-1;
 	if(G.path[r]==-1){
 		cout<<-1;

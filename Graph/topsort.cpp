@@ -11,62 +11,48 @@ using LL = long long;
 const int MONKE = 0;
 
 //untested 
-
+class Graph {
+public:
+    int n;
+    vector<vector<int>> adj;
+    Graph(int n = 0) : n(n), adj(n) {}
+    inline void add_edge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    inline int add_node() {
+        adj.push_back({});
+        return n++;
+    }
+    inline vector<int>& operator[](int u) { 
+        return adj[u]; 
+    }
+};
 class top_sort{
 public:
-	vector <vector <int> > adj;
-	vector <int> in,order;
 	int n;
-	top_sort(int _n,vector <pair<int,int> > &edges){
-		n = _n;
-		adj.clear();
-		adj.resize(n);
-		in.resize(n);
-		for(auto &e:edges){
-			adj[e.first].push_back(e.second);
-			in[e.second]++;
-		}
-	}
-	void make_sorted(){
+	vector <int> in, order;
+	top_sort(Graph &G): n(G.n), in(G.n) {
+		for(auto &A: G.adj) 
+			for(int &e: A) 
+				in[e]++;
+
 		queue <int> q;
 		order.clear();
-		for(int i=0;i<n;i++){
-			if(!in[i]) q.push(i);
-		}
-		while(!q.empty()){
+		for(int i = 0; i < n; i++) if(!in[i]) 
+			q.push(i);
+		for(;!q.empty(); q.pop()){
 			auto t = q.front();
 			order.push_back(t);
-			q.pop();
-			for(auto v:adj[t]){
-				in[v]--;
-				dbg(v);
-				if(!in[v]){
+			for(auto v: G[t])
+				if(--in[v] == 0)
 					q.push(v);
-				}
-			}
 		}
 	}
 };
 
 int main()
 {
-	int t;
-	fastio
-	cin>>t;
-	for(int tc=1;tc<=t;tc++){
-		int n,m;
-		cin>>n>>m;
-		vector <vector <int> >adj(n);
-		vector <pair<int,int> >edges(m);
-		for(auto &e:edges){
-			cin>>e.first>>e.second;
-			e.first--; e.second--;
-		}
-		top_sort graph(n,edges);
-		graph.make_sorted();
-		for(auto x:graph.order){
-			cout<<x+1<<" ";
-		}
-	}
+
 	return MONKE;
 }

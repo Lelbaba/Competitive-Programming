@@ -22,26 +22,19 @@ tuple <LL,LL,LL> EGCD(LL a, LL b){
 }
 // given modulo equations, will apply CRT
 PLL CRT(vector <PLL> &v){
-    PLL ans = {0,1};
-    auto &[V, M] = ans;
-    for(auto &[val,mod]:v){
-        auto [x,y,g] = EGCD(M, mod);
-        if((val-V)%g != 0)
-            return {-1,0};
-        ans = {V + x*(val-V)/g % (mod/g) * M, M*mod/g};
-        V = (V%M + M)%M; //might be unnecessary
+    LL V = 0, M = 1;
+    for(auto &[v, m]:v){
+        auto [x, y, g] = EGCD(M, m);
+        if((v - V) % g != 0)
+            return {-1, 0};
+        V += x * (v - V) / g % (m / g) * M, M *= m / g;
+        V = (V % M + M) % M;
     }
-    return ans;
+    return make_pair(V, M);
 }
 
-mod
 int main()
 {
     monke_flip
-    vector <crt_dt> v;
-    v.emplace_back(3,7);
-    v.emplace_back(1,3);
-    auto x = CRT(v);
-    dbg(x.val,x.mod);
     return MONKE;
 }

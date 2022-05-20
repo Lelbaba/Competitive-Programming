@@ -97,7 +97,77 @@ namespace Tree{
         return query(L,min(m,R),s,m, node*2)+ query(max(L,m+1), R, m+1, e, node*2+1);
     }
 };
+namespace Segment_Tree{
+    struct Node {
+        LL val, lazy;
+        Node *left, *right;
+        Node(LL val = 0, LL lazy = 0) : val(val), lazy(lazy) {}
+    };
+    const int N = 1e5 + 5;
+    vector <Node> tree;
+    Node* NewNode() {
+        tree.emplace_back();
+        return &tree.back();
+    }
+    const LL I = 0;
+    void apply(Node* node, int s, int e, LL up) {
+        node -> val += up * (e - s + 1);
+        node -> lazy += up;
+    }
+    void merge(Node* node, int s, int e) {
+        node -> val = node -> left -> val + node -> right -> val;
+    }
+    void reset(Node* node, int s, int e) {
+        node -> lazy = 0;
+    }
+    LL get(int s, int e, LL a, LL b) {
+        return a + b;
+    }
+    LL ans(Node* node, int s, int e) {
+        return node -> val;
+    }
+    void propagate(Node* node, int s, int e) {
+        apply(node -> left, s, s + e >> 1, node -> lazy);
+        apply(node -> right, s + e + 2 >> 1, e, node -> lazy);
+        reset(node, s, e);
+    }
+    void build(Node* node, int s, int e, vector <LL> &v) {
+        if(s == e){
+            node -> val = v[s];
+            return;
+        }
+        node -> left = NewNode();
+        node -> right = NewNode();
+        int m = s + e >> 1;
+        build(node -> left, s, m, v);
+        build(node -> right, m + 1, e, v);
+        merge(node, s, e);
+    }
+    void update(Node* node, int s, int e, int _s, int _e, LL up) {
+        _s = max(_s, s), _e = min(_e, e);
+        if(_s > _e) return;
+        if(_s == s and _e == e) {
+            apply(node, s, e, up);
+            return;
+        }
+        propagate(node, s, e);
+        int m = s + e >> 1;
+        update(node -> left, s, m, _s, _e, up);
+        update(node -> right, m + 1, e, _s, _e, up);
+        merge(node, s, e);
+    }
+    LL query(Node *node, int s, int e, int _s, int _e) {
+        _s = max(_s, s), _e = min(_e, e);
+        if(_s > _e) return I;
+        if(_s == s and _e == e) return ans(node, s, e);
 
+        propagate(node, s, e);
+        int m = s + e >> 1;
+        LL L = query(node -> left, s, m, _s, _e);
+        LL R = query(node -> right, m + 1, e, _s, _e);
+        return get(s, e, L, R);
+    }
+}
 void solve(){
     string pirates, tem;
     int M, T;
@@ -109,9 +179,6 @@ void solve(){
     }
     int n = pirates.size();
     Tree::build(0,n-1,pirates);
-        cerr << "COMMENCING CHECK "<< -1 <<'\n';
-        cerr << "********************************************\n";
-        Tree::check(0,n-1);
     cin >> T;
     for(int i = 0, l, r, q = 1; i< T; i++){
         char ch;
@@ -121,9 +188,6 @@ void solve(){
         } else {
             Tree::update(l,r,ch, 0, n-1);
         }
-        cerr << "COMMENCING CHECK "<< i <<'\n';
-        cerr << "********************************************\n";
-        Tree::check(0,n-1);
     }
 }
 

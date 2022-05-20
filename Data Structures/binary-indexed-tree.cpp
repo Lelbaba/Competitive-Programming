@@ -11,38 +11,35 @@ using namespace std;
 using LL = long long;
 const int MONKE = 0;
 
-class BIT {
+template <typename DT> class BIT {
     public:
-        vector<int> tree; 
+        vector <DT> tree; 
         int n;
     BIT(int n) {
         this->n = n;
         tree.assign(n, 0);
     }
-    BIT(vector<int> a) : BIT(a.size()) {
-        for (int i = 0; i < a.size(); i++){
+    BIT(const vector <DT> &a) : BIT(a.size()) {
+        for (int i = 0; i < n; i++)
             add(i, a[i]);
-        }
     }
-    int sum(int r) {
-        int ret = 0;
-        for (; r >= 0; r = (r & (r + 1)) - 1){
+    DT sum(int r) {
+        DT ret = 0;
+        for (; r >= 0; r = (r & (r + 1)) - 1)
             ret += tree[r];
-        }
         return ret;
     }
-    int sum(int l, int r) {
+    DT sum(int l, int r) {
         return sum(r) - sum(l - 1);
     }
-    void add(int idx, int delta) {
-        for (; idx < n; idx = idx | (idx + 1)){
+    void add(int idx, DT delta) {
+        for (; idx < n; idx = idx | (idx + 1))
             tree[idx] += delta;
-        }
     }
 };
 int main()
 {
     monke_flip
-    
+    BIT <LL> T(5);
     return MONKE;
 }
