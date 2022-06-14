@@ -77,13 +77,23 @@ public:
         }
         return ans;
     }
+    vector <int> :: iterator begin() {
+        return a.begin();
+    }
+    vector <int> :: iterator end() {
+        return a.end();
+    }
 };
 /*....................................................................*/ 
 
 int main()
 {
     monke_flip
-    Permutation A({1, 2, 0, 5, 3, 6, 4}), B({6, 2, 3, 0, 5, 4, 1});
-    dbg((B * A * A * B).a);
+    Permutation P(5);
+    for(auto &e:P){
+        cin >> e;
+        e--;
+    }
+    
     return MONKE;
 }

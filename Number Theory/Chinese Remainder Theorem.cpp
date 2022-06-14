@@ -23,7 +23,7 @@ tuple <LL,LL,LL> EGCD(LL a, LL b){
 // given modulo equations, will apply CRT
 PLL CRT(vector <PLL> &v){
     LL V = 0, M = 1;
-    for(auto &[v, m]:v){
+    for(auto &[v, m]:v){ //value % mod
         auto [x, y, g] = EGCD(M, m);
         if((v - V) % g != 0)
             return {-1, 0};

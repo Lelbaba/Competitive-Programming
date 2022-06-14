@@ -15,14 +15,12 @@ const int MONKE = 0;
 
 /*....................................................................*/ 
 class DSU{
-    public:
         vector <int> par,size;
         // parent of each set and size of each set
-    DSU(int n){
-        for(int i=0;i<n;i++){
-            par.push_back(i);
-            size.push_back(1);
-        }
+    public:
+    DSU(int n) : par(n), size(n) {
+        fill(size.begin(), size.end(), 1);
+        iota(par.begin(), par.end(), 0);
     }
     // ancestor
     int Anc(int node){
@@ -30,13 +28,16 @@ class DSU{
             return node;
         return par[node] = Anc(par[node]); 
     }
-    bool same(int x,int y){
+    bool same(int x, int y){
         return Anc(x) == Anc(y);
     }
-    void Union(int x,int y){
-        x = Anc(x),y = Anc(y);
-        size[x] += size[y];
-        par[y] = x;
+    void Union(int x, int y){
+        x = Anc(x), y = Anc(y);
+        if(x == y) 
+            return;
+        if(size[x] < size[y])
+            swap(x, y);
+        size[x] += size[y], par[y] = x;
     }
     int Size(int node){
         return size[Anc(node)];

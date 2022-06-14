@@ -147,15 +147,18 @@ class circle {
         R = sqrt(~(O - A));
     }
     double SectorArea(double ang) {
+        // Area of a sector of cicle
         return ang* R * R * .5;
     }
     double SectorArea(const point <DT> &a, const point <DT> &b) {
         return SectorArea(Angle(a - O, b - O));
     }
     double ChordArea(const point <DT> &a, const point <DT> &b) {
+        // Area between sector and its chord
         return SectorArea(a, b) - 0.5 * TriArea(O, a, b);
     }
     int Contains(const point <DT> &p){
+        // 0 for outside, 1 for inside, -1 for on the circle
         DT d = DisSq(O, p);
         return d > R * R ? 0 : (d == R * R ? -1 : 1);
     }
@@ -181,6 +184,7 @@ class circle {
         return {1 + (x > EPS), P - h, P + h};
     } 
     double SegmentedArea(point <DT> &a,  point <DT> &b) {
+        // signed area of the intersection between the circle and triangle OAB
         double ans = SectorArea(a, b);
         line <DT> L(a, b);
         auto [cnt, p1, p2] = IntersectionPoint(*this, L);
