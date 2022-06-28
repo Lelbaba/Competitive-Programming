@@ -1,2 +1,8 @@
 *.out
 *.exe
+*.log
+*.aux
+*.toc
+*.upa
+*.upb
+

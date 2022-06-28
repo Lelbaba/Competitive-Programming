@@ -1,6 +1,0 @@
-\babel@toc {english}{}
-\contentsline {section}{\numberline {1}Some Bruteforce Optimizations}{1}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Constrained Bruteforce}{1}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Meet In the Middle}{1}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Prefix Sum Optimization}{1}{subsection.1.3}%
-\contentsline {subsection}{\numberline {1.4}Two Pointers}{1}{subsection.1.4}%
