@@ -16,7 +16,7 @@ const int MONKE = 0;
 /*....................................................................*/ 
 
 /*....................................................................*/ 
-inline sgn(int mask) {
+inline int sgn(int mask) {
     return 1 - 2 * (__builtin_popcount(mask) & 1);
 } // returns 1 if set cardinality is even, -1 otherwise
 
