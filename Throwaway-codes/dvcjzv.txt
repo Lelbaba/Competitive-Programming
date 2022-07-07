@@ -1,0 +1,124 @@
+from dataclasses import dataclass
+from queue import Queue
+from random import randrange
+from time import perf_counter
+from typing import List, Set, Tuple, Dict
+
+import numpy as np
+import numpy.typing as npt
+
+from matplotlib import pyplot as plt
+
+from colony.typing import Matrix, Vector3, Vector3f, Vector3i
+
+inf = (1 << 64) - 1;
+
+@dataclass
+class Edge:
+    u: int
+    v: int
+    cap: int
+    cost: int
+    flow: int = 0
+    blocked: int = 0
+'''
+flow going through forward edge inside a node 
+implies that all adjacent nodes in padded region 
+must not accept flow
+
+the blocker function will block those edges
+if flow goes through reverse edge, it undoes the decision
+hence all blocked nodes must be unblocked 
+
+since multiple nodes can block a single node, we must keep 
+track of the numbers as well '''
+class MCMF:
+    def __init__(s, n: int, padding: int):
+        s.n = n
+        s.src = -1
+        s.sink = -1
+        s.padding = padding
+        
+        s.g: List[List[int]] = [[] for _ in range(n)]
+        s.edges: List[Edge] = []
+        s.pashe: List[List[int]] = []
+
+        s.prev: List[int] = [-1 for _ in range(n)]
+
+        s.inq: List[bool] = [] 
+        s.dis: List[int] = [] 
+
+    def blocker(s, e: int):
+        dl = 1 - 2 * (e & 1)
+        e -= (e & 1);
+        Q = Queue()
+        vis: Dict[int, int] = {}
+
+        Q.put(e)
+        vis[e] = 0
+
+        while not Q.empty():
+            cur = Q.get()
+            s.edges[cur].blocked += dl
+            for nxt in s.pashe[cur]:
+                if nxt not in vis and vis[cur] < s.padding:
+                    vis[nxt] = vis[cur] + 1
+                    Q.put(nxt)
+
+
+    def add_edge(s, u: int, v: int, cap: int, cost: int):
+        s.g[u].append(len(s.edges))
+        edges.append(Edge(u, v, cap, cost))
+
+        s.g[v].append(len(s.edges))
+        edges.append(Edge(v, u, 0, -cost))
+
+        s.pashe.append([])
+        s.pashe.append([])
+        return len(edges) - 2
+
+    def spfa(s) -> bool:
+        s.dis = [inf for _ in range(s.n)]
+        s.inq = [false for _ in range(s.n)]
+
+        s.dis[s.src] = 0
+        s.prev[s.src] = -1
+
+        Q = Queue()
+        Q.put(s.src)
+        s.inq[s.src] = True
+
+        while not Q.empty(): 
+            u = Q.get()
+            for e in enumerate(g[u]):
+                if s.edges[blocked] == 0 and s.edges[e].cap > s.edges[e].flow and s.dis[s.edges[e].v] > s.dis[u] + s.edges[e].cost:
+                    s.dis[s.edges[e].v] = s.dis[u] + s.edges[e].cost
+                    s.prev[s.edges[e].v] = e
+                    if not s.inq[s.edges[e].v]:
+                        s.inq[s.edges[e].v] = True
+                        Q.put(s.edges[e].v)
+            s.inq[u] = False
+        return s.dis[sink] != inf
+
+    def solve(s, src: int, sink: int) -> Tuple[int, int]:
+        s.src = src
+        s.sink = sink
+        s.flow = 0
+        s.cost = 0
+        while s.spfa():
+            bottleneck = inf
+            cur = s.prev[sink]
+            while cur != -1:
+                bottleneck = min(bottleneck, s.edges[cur].cap - s.edges[cur].flow)
+                cur = s.prev[s.edges[cur].u]
+
+            cur = s.prev[sink]
+            while cur != -1:
+                s.edges[cur].flow += bottleneck
+                s.edges[cur ^ 1].flow -= bottleneck
+                blocker(cur)
+                cur = s.prev[s.edges[cur].u]
+
+            s.cost += bottleneck * s.dis[sink]
+            s.flow += bottleneck
+        return (s.flow, s.cost)
