@@ -12,34 +12,9 @@ using LL = long long;
 const int MONKE = 0;
 
 class Tree{
-    int time = 0, LOG = 25;
+    int time = 0;
     vector <vector <int> > adj;
-    vector <vector <int>> anc;
     vector <int> start, finish, level, par;
-
-    void SetupLifting(int node, int par) {
-        for (int v: adj[node]) {
-            if(v == par)
-                continue;
-            anc[v][0] = node;
-            level[v] = level[node] + 1;
-            for (int k = 1; k < LOG; k++)     
-                anc[v][k] = anc[anc[v][k-1]][k-1];
-            SetupLifting(v, node);
-        }
-    }
-    void Call(int node, int p = -1){
-        if(p != -1)
-            level[node] = level[p] + 1;
-        start[node] = time++;
-        for(int e: adj[node]){
-            if(e == p)
-                continue;
-            Call(e, node);
-        }
-        par[node] = p; 
-        finish[node] = time++;
-    }
 public:
     int n;
     vector <vector <int> > col;
@@ -53,10 +28,46 @@ public:
         col[u].push_back(c);
         col[v].push_back(c);
     }
-    void InitTimer(int root){
-        start.resize(n), finish.resize(n), level.resize(n), par.resize(n);
+};
+set <int> GetCenters(Tree &T){
+    int n = T.n;
+    vector <uint32_t> deg(n), q;
+    set <int> s;
+    for(int i = 0; i < n; i++){
+        deg[i] = T[i].size();
+        if(deg[i] == 1)
+            q.push_back(i);
+        s.insert(i);
+    }
+    while(s.size() > 2){
+        vector <uint32_t> t;
+        for(auto x: q) {
+            for(auto e: T[x]){
+                if(--deg[e] == 1)
+                    t.push_back(e);
+            }
+            s.erase(x);
+        }
+        q = t;
+    }
+    return s;
+}
+struct DFS_Timer {
+    int time = 0;
+    vector <int> start, finish, level, par;
+    int n;
+    Tree &T;
+    DFS_Timer(Tree &T, int root = 0) : T(T), n(T.n), start(n), finish(n), level(n), par(n) {
         time = 0;
         Call(root);
+    }
+    void Call(int node, int p = -1){
+        if(p != -1) level[node] = level[p] + 1;
+        start[node] = time++;
+        for(int e: T[node]) if(e != p) 
+            Call(e, node);
+        par[node] = p; 
+        finish[node] = time++;
     }
     bool IsAncestor(int node, int par){
         return start[par] <= start[node] and finish[par] >= finish[node];
@@ -64,8 +75,25 @@ public:
     int SubtreeSize(int node){
         return finish[node] - start[node] + 1 >> 1;
     }
+};
+struct LCA_Table {
+    Tree &T;
+    int n, LOG = 25;
+    vector <vector <int>> anc;
+    vector <int> level;
 
-    void InitLifting(int root){
+    void SetupLifting(int node, int par) {
+        for (int v: T[node]) {
+            if(v == par)
+                continue;
+            anc[v][0] = node;
+            level[v] = level[node] + 1;
+            for (int k = 1; k < LOG; k++)     
+                anc[v][k] = anc[anc[v][k-1]][k-1];
+            SetupLifting(v, node);
+        }
+    }
+    LCA_Table(Tree &T, int root = 0): T(T), n(T.n) {
         LOG = 33 - __builtin_clz(n);
         anc.assign(n, vector <int> (LOG, root));
         level.resize(n);
@@ -94,37 +122,16 @@ public:
         int g = LCA(u, v);
         return level[u] + level[v] - 2 * level[g];
     }
-
-    set <int> GetCenters(){
-        vector <int> deg(n), q;
-        set <int> s;
-        for(int i = 0; i < n; i++){
-            deg[i] = adj[i].size();
-            if(deg[i] == 1)
-                q.push_back(i);
-            s.insert(i);
-        }
-        while(s.size() > 2){
-            vector <int> t;
-            for(auto x: q) {
-                for(auto e: adj[x]){
-                    if(--deg[e] == 1)
-                        t.push_back(e);
-                }
-                s.erase(x);
-            }
-            q = t;
-        }
-        return s;
-    }
 };
-//USACO yinyangpath
+// USACO yinyangpath
 template <typename DT> class c_vector : public vector <DT> {
 public:
     using vector <DT> :: vector;  
     using vector <DT> :: begin;
     using vector <DT> :: size;
-    DT& operator [] (int idx) {
+    DT& operator [] (int _idx) {
+        _idx = _idx % int(size());
+        size_t idx = _idx + size() * (_idx < 0);
         return idx >= 0 and idx < size() ? *(begin() + idx) : *(begin() + (size() + idx));
     }
     void clear(int l, int r){
@@ -158,14 +165,14 @@ class Centroid_Decomposition {
         right[Max < sum or Min > sum][sum]++;
         Max = max(Max, sum), Min = min(Min, sum);
         GMin = min(GMin, sum), GMax = max(GMax, sum);
-        for(int i = 0; i < T[node].size(); i++) if(T[node][i] != par) {
+        for(size_t i = 0; i < T[node].size(); i++) if(T[node][i] != par) {
             dfs(T, T[node][i], node, Min, Max, sum + T.col[node][i]);
         }
     }
     LL solve(Tree &T, int c, int sz) {
         LL ans = 0;
         left[0].clear(-sz, sz), left[1].clear(-sz, sz);
-        for(int i = 0; i < T[c].size(); i++) {
+        for(size_t i = 0; i < T[c].size(); i++) {
             GMin = 1, GMax = -1;
             dfs(T, T[c][i], c, GMin, GMax, T.col[c][i]);
             ans += right[0][0] + left[1][0] * right[1][0];
@@ -201,11 +208,11 @@ int main()
     int n;
     cin >> n;
     Tree T(n);
-    Centroid_Decomposition Decomposer;
-    for(int i = 0, u, v, cl; i < n - 1; i++) {
-        cin >> u >> v >> cl;
-        T.AddEdge(u - 1, v - 1, 2 * cl - 1);
-    }
-    cout << Decomposer(T, 0);
+    // Centroid_Decomposition Decomposer;
+    // for(int i = 0, u, v, cl; i < n - 1; i++) {
+    //     cin >> u >> v >> cl;
+    //     T.AddEdge(u - 1, v - 1, 2 * cl - 1);
+    // }
+    // cout << Decomposer(T, 0);
     return MONKE;
 }
