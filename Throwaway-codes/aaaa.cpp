@@ -12,180 +12,163 @@ using LL = long long;
 using ULL = unsigned long long;
 mt19937_64 rng(random_monke);
 const int MONKE = 0;
+#include <ext/pb_ds/assoc_container.hpp>
+using namespace __gnu_pbds;
+// Order Statistic Tree
 
-/*....................................................................*/
-namespace MCMF {
-    typedef long long F; typedef double C;
-    const F infF = 1e18; const C infC = 1e18;
+/* Special functions:
+        find_by_order(k) --> returns iterator to the kth largest element counting from 0
+        order_of_key(val) --> returns the number of items in a set that are strictly smaller than our item
+*/
 
-    const int N = 5005;
-    typedef pair<C, F> PCF;
+/*....................................................................*/ 
 
-    struct Edge {int frm, to; C cost; F cap, flow;};
+namespace Dinic {
+    typedef long long LL;
+    const int N = 5005, K = 60; /// N > no of nodes, K >= max bits in capacity
+    const LL INF = 1e18;
 
-    int n, s, t;
+    struct Edge { int frm, to; LL cap, flow; };
+
+    int s, t, n;
+    int level[N], ptr[N];
     vector<Edge> edges;
     vector<int> adj[N];
-    C pi[N], dis[N];
-    F fl[N];
-    int prv[N], vis[N];
 
-    void init(int nodes, int source, int sink) {
-        n = nodes, s = source, t = sink;
-        for (int i=0; i<n; i++) pi[i] = 0, adj[i].clear();
+    void init(int nodes) {
+        n = nodes;
+        for (int i=0; i<n; i++)    adj[i].clear();
         edges.clear();
     }
 
-    void addEdge(int u, int v, F cap,C cost) {
-        edges.push_back({u, v, cost, cap, 0});
-        edges.push_back({v, u, -cost, 0, 0});
-        adj[u].push_back(edges.size()-2);
-        adj[v].push_back(edges.size()-1);
+    /// For adding undirected Edge (u, v, c) call addEdge(u, v, c, c);
+    int addEdge(int a, int b, LL cap, LL revcap = 0) {
+        edges.push_back({a, b, cap, 0});
+        edges.push_back({b, a, revcap, 0});
+        adj[a].push_back(edges.size()-2);
+        adj[b].push_back(edges.size()-1);
+        return edges.size()-2;
     }
 
-    bool SPFA() {
-        for (int i=0; i<n; i++) {
-            dis[i] = infC; fl[i] = 0;
-            vis[i] = 0; prv[i] = -1;
-        }
+    bool bfs(LL lim) {
+        fill(level, level+n, -1);
+        level[s] = 0;
         queue<int> q;
         q.push(s);
-        dis[s] = 0; fl[s] = infF; vis[s] = 1;
 
-        while (!q.empty()) {
-            int u = q.front(); q.pop();
-            vis[u] = 0;
-            for (int eid : adj[u]) {
-                Edge &e = edges[eid];
-                if (e.cap == e.flow) continue;
-
-                if (dis[u] + e.cost < dis[e.to]) {
-                    dis[e.to] = dis[u] + e.cost;
-                    fl[e.to] = min(fl[u], e.cap - e.flow);
-                    prv[e.to] = eid^1;
-                    if (!vis[e.to])     q.push(e.to);
+        while (!q.empty() && level[t] == -1) {
+            int v = q.front();
+            q.pop();
+            for (int id: adj[v]) {
+                Edge e = edges[id];
+                if (level[e.to] == -1 && e.cap - e.flow >= lim) {
+                    q.push(e.to);
+                    level[e.to] = level[v] + 1;
                 }
             }
         }
-        return fl[t] > 0;
+        return level[t] != -1;
     }
-
-    PCF solveSPFA() {
-        C cost = 0; F flow = 0;
-        while (SPFA()) {
-            C pathcost = dis[t];
-            cost += pathcost*fl[t]; flow += fl[t];
-            for (int u=t, e=prv[u]; e!=-1; u=edges[e].to, e=prv[u]) {
-                edges[e].flow -= fl[t];
-                edges[e^1].flow += fl[t];
+    LL dfs(int v, LL flow) {
+        if (v == t || !flow)        return flow;
+        for (; ptr[v] < adj[v].size(); ptr[v]++) {
+            int eid = adj[v][ptr[v]];
+            Edge &e = edges[eid];
+            if (level[e.to] != level[v] + 1)    continue;
+            if (LL pushed = dfs(e.to, min(flow, e.cap - e.flow))) {
+                e.flow += pushed;
+                edges[eid^1].flow -= pushed;
+                return pushed;
             }
         }
-        return {cost, flow};
+        return 0;
     }
+    LL maxFlow(int source, int sink, bool SCALING = false) {
+        s = source, t = sink;
 
-    void normalize() {
-        SPFA();
-        for (int i=0; i<n; i++) pi[i] = dis[i];
-    }
-
-    bool Dijkstra() {
-        for (int i=0; i<n; i++) {
-            dis[i] = infC; fl[i] = 0;
-            vis[i] = 0; prv[i] = -1;
-        }
-        priority_queue<pair<C, int>> pq;
-        pq.emplace(0, s);
-        dis[s] = 0; fl[s] = infF;
-
-        while (!pq.empty()) {
-            int u = pq.top().second; pq.pop();
-            if (vis[u]) continue;
-            vis[u] = 1;
-
-            for (int eid : adj[u]) {
-                Edge &e = edges[eid];
-                if (vis[e.to] || e.cap == e.flow) continue;
-
-                C nw = dis[u] + e.cost - pi[e.to] + pi[u];
-                if (nw < dis[e.to]) {
-                    dis[e.to] = nw;
-                    fl[e.to] = min(fl[u], e.cap - e.flow);
-                    prv[e.to] = eid^1;
-                    pq.emplace(-dis[e.to], e.to);
-                }
+        long long flow = 0;
+        for (LL lim = SCALING ? (1LL << K) : 1; lim > 0; lim >>= 1) {
+            while (bfs(lim)) {
+                fill(ptr, ptr+n, 0);
+                while (LL pushed = dfs(s, INF)) flow += pushed;
             }
         }
-        return fl[t] > 0;
+        return flow;
     }
 
-    PCF solveDijkstra() {
-        normalize();
-        C cost = 0; F flow = 0;
-        while (Dijkstra()) {
-            for (int i=0; i<n; i++)
-                if (fl[i])     pi[i] += dis[i];
-            C pathcost = pi[t]-pi[s];
-            cost += pathcost*fl[t]; flow += fl[t];
+    bool leftOfMinCut(int x) {return level[x] != -1;}
 
-            for (int u=t, e=prv[u]; e!=-1; u=edges[e].to, e=prv[u]) {
-                edges[e].flow -= fl[t];
-                edges[e^1].flow += fl[t];
-            }
+    /// Only works for undirected graph, Make sure to add UNDIRECTED edges. (u, v, c, c)
+    /// returns n by n matrix flow, st flow[i][j] = maxFlow
+    /// tree holds the edges of a gomory-hu tree of the graph
+    vector<vector<LL>> allPairMaxFlow(vector<Edge> &tree) {
+        tree.clear();
+        vector<vector<LL>> flow(n, vector<LL> (n, INF));
+
+        vector<int> par(n);
+        for (int i=1; i<n; i++) {
+            for (auto &e: edges)    e.flow = 0;
+            LL f = maxFlow(i, par[i]);
+            tree.push_back({i, par[i], f});
+
+            for (int j=i+1; j<n; j++)
+                if (par[j] == par[i] && leftOfMinCut(j)) par[j] = i;
+
+            flow[i][par[i]] = flow[par[i]][i] = f;
+            for (int j=0; j<i; j++)
+                if (j != par[i])    flow[i][j] = flow[j][i] = min(f, flow[par[i]][j]);
         }
-        return {cost, flow};
+        return flow;
     }
 }
-// want to minimize cost and don't care about flow
-// add edge from sink to dummy sink (cap = inf, cost = 0)
-// add edge from source to sink (cap = inf, cost = 0)
-// run mcmf, cost returned is the minimum cost
 
-/*....................................................................*/
-
-void solve() {
-    int n, m, k;
-    cin >> n >> m >> k;
-    vector <double> p(k + 1), d(k + 1);
-    vector <int> book(n + 1);
-
-    for(int i = 1; i <= k; i++) 
-        cin >> p[i];
-    for(int i = 1; i <= k; i++) 
-        cin >> d[i];
-    for(int i = 1; i <= n; i++)
-        cin >> book[i];
-
-    double lo = 0, hi = 1;
-    for(int _ = 0; _ < 100; _++) {
-        double mid = lo + (hi - lo) / 2;
-        MCMF :: init(n + 2, 0, n + 1);
-
-        for(int i = 1; i < n; i++)  
-            MCMF :: addEdge(i, i + 1, m - 1, 0.);
-
-        vector <int> last(k + 1);
-        for(int i = 1; i <= n; i++){
-            int b = book[i];
-            MCMF :: addEdge(last[b], i, 1, p[b] - d[b]);
-            if(last[b])  MCMF :: addEdge(0, last[b], 1, 0.);
-            MCMF :: addEdge(i, n + 1, 1, -p[b] * mid);
-            last[b] = i;
-        }
-        auto [mc, mf] = MCMF :: solveDijkstra();
-        assert(mf == n);
-        if(mc < 0) hi = mid;
-        else lo = mid;
-    }
-    cout << fixed << setprecision(10) << lo * 100 << '\n';
-}
-
+/*....................................................................*/ 
 int main()
 {
     monke_flip
-    int t = 1;
-    cin >> t;
-    for (int tc = 1; tc <= t; tc++) {
-        solve();
+    int n;
+    cin >> n;
+    vector <pair <int, int>> v(n);
+    vector <int> vals;
+    for(auto &[x, y]: v)  {
+        cin >> x >> y;
+        vals.push_back(x + y);
+        vals.push_back(x - y);
+        vals.push_back(x * y);
+    }
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    dbg(vals);
+    map <int, int> Nodes;
+    int N = n;
+    for(auto e: vals) Nodes[e] = N++;
+    dbg(Nodes);
+    int S = N++, T = N++;
+    Dinic :: init(N);
+    map <pair <int, int>, int> edge;
+    vector <map <string, int>> EE(n);
+    auto &EDG = Dinic :: edges;
+    for(int i = 0; i < n; i++) {
+        auto [x, y] = v[i];
+        dbg(x, y);
+        dbg(Nodes[x - y]);
+        EE[i][" + "] = Dinic :: addEdge(i, Nodes[x + y], 1);
+        EE[i][" - "] = Dinic :: addEdge(i, Nodes[x - y], 1);
+        EE[i][" * "] = Dinic :: addEdge(i, Nodes[x * y], 1);
+        Dinic :: addEdge(S, i, 1);
+    }
+    for(int i = 0; i < vals.size(); i++) 
+        Dinic :: addEdge(n + i, T, 1);
+    if(Dinic :: maxFlow(S, T) < n) cout << "impossible\n";
+    else {
+        for(int i = 0; i < n; i++) {
+            for(auto &[op, ed] : EE[i]) {
+                if(EDG[ed].flow){
+                    cout << v[i].first << op << v[i].second << " = " << vals[EDG[ed].to - n] << '\n';
+                    break;
+                }
+            }
+        }
     }
     return MONKE;
 }
