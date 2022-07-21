@@ -216,7 +216,78 @@ using namespace NTT_;
 //        dtol[tep] = i; ltod[i] = tep;
 //    }
 //}
+namespace NTT {
+    vector<int> perm, wp[2];
+    const int mod = 998244353, G = 3;    ///G is the primitive root of M
+    int root, inv, N, invN;
 
+    int power(int a, int p) {
+        int ans = 1;
+        while (p) {
+            if (p & 1) ans = (1LL*ans*a)%mod;
+            a = (1LL*a*a)%mod;
+            p >>= 1;
+        }
+        return ans;
+    }
+
+    void precalculate(int n) {
+        assert( (n&(n-1)) == 0 && (mod-1)%n==0);
+        N = n;
+        invN = power(N, mod-2);
+        perm = wp[0] = wp[1] = vector<int>(N);
+
+        perm[0] = 0;
+        for (int k=1; k<N; k<<=1)
+            for (int i=0; i<k; i++) {
+                perm[i] <<= 1;
+                perm[i+k] = 1 + perm[i];
+            }
+
+        root = power(G, (mod-1)/N);
+        inv = power(root, mod-2);
+        wp[0][0]=wp[1][0]=1;
+
+        for (int i=1; i<N; i++) {
+            wp[0][i] = (wp[0][i-1]*1LL*root)%mod;
+            wp[1][i] = (wp[1][i-1]*1LL*inv)%mod;
+        }
+    }
+
+    void fft(vector<int> &v, bool invert = false) {
+        if (v.size() != perm.size())   precalculate(v.size());
+        for (int i=0; i<N; i++)
+            if (i < perm[i])
+                swap(v[i], v[perm[i]]);
+
+        for (int len = 2; len <= N; len *= 2) {
+            for (int i=0, d = N/len; i<N; i+=len) {
+                for (int j=0, idx=0; j<len/2; j++, idx += d) {
+                    int x = v[i+j];
+                    int y = (wp[invert][idx]*1LL*v[i+j+len/2])%mod;
+                    v[i+j] = (x+y>=mod ? x+y-mod : x+y);
+                    v[i+j+len/2] = (x-y>=0 ? x-y : x-y+mod);
+                }
+            }
+        }
+        if (invert) {
+            for (int &x : v) x = (x*1LL*invN)%mod;
+        }
+    }
+
+    vector<int> multiply(vector<int> a, vector<int> b) {
+        int n = 1;
+        while (n < a.size()+ b.size())  n<<=1;
+        a.resize(n);
+        b.resize(n);
+
+        fft(a);
+        fft(b);
+        for (int i=0; i<n; i++) a[i] = (a[i] * 1LL * b[i])%mod;
+        fft(a, true);
+        return a;
+    }
+};
 void solve() {
     int n; cin >> n;
     Polynomial a(n + 1); for(int i = 0; i < n; ++ i) cin >> a[i];

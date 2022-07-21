@@ -20,6 +20,12 @@ const int MONKE = 0;
 int main()
 {
     monke_flip
-    cout << xor ()(5, 6);
+    cout << 10000 << '\n';
+    for(int i = 0; i < 10000; i++) {
+        cout << 20 << '\n';
+        for(int j = 0; j < 20; j++) 
+            cout << uniform_int_distribution <int> (0, 10)(rng) << ' ';
+        cout << '\n';
+    }
     return MONKE;
 }

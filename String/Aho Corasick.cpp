@@ -34,7 +34,7 @@ struct AC {
         out.emplace_back(0);
         return N++;
     }
-    int add_pattern(const string T) {
+    int add_pattern(const string &T) {
         int u = 0;
         for (auto c : T) {
             if (!next[u][c - 'a']) next[u][c - 'a'] = node();
@@ -64,7 +64,7 @@ struct AC {
         u = next[u][c - 'a'];
         return u;
     }
-    void match(const string S) {
+    void match(const string &S) {
         int u = 0;
         for (int i = 0; i < S.size(); ++i) {
             char c = S[i];

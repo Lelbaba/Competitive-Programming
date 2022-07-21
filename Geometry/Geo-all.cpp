@@ -53,9 +53,8 @@ class point{
         double ans = Angle(b) - Angle(a);
         return ans <= -PI ? ans + 2*PI : (ans > PI ? ans - 2*PI : ans);
     }
-    friend point Perp(const point &a){
-        return point(-a.y, a.x);
-    }
+    point Perp(const point &a){ return point(-a.y, a.x); }
+    point Conj(const point &a){ return point(a.x, -a.y); }
 };
 template <typename DT> using polygon = vector <point <DT>>; 
 template <typename DT> 
@@ -277,6 +276,35 @@ namespace polygon_algo{
     }
 }
 using namespace polygon_algo;
+
+// CLOSEST PAIR OF POINTS
+template <typename DT> Dis(point <DT> a, point <DT> b){
+    return ~(a - b);
+}
+template <typename DT>
+DT Closest_Distance(vector <point <DT>> &v) {
+    int n = v.size();
+    sort(v.begin(), v.end());
+    auto cmp = [](point <DT> a, point <DT> b) {return (a.y < b.y || (a.y == b.y && a.x < b.x));};
+    set <point <DT>, decltype(cmp)> s(cmp);
+
+    DT best = 1e18;
+    int j = 0;
+    for (int i = 0; i < n; i++) {
+        while (sq(v[i].x - v[j].x) >= best) {
+            s.erase(v[j]);
+            j = (j + 1) % n;
+        }
+        DT d = best;
+        auto it1 = s.lower_bound( point <DT>(v[i].x, v[i].y - d) );
+        auto it2 = s.upper_bound( point <DT>(v[i].x, v[i].y + d) );
+        for (auto it = it1; it != it2; it++) 
+            best = min(best, Dis(v[i], *it));
+
+        s.insert(v[i]);
+    }
+    return best;
+}
 /*....................................................................*/ 
 
 void solve() {

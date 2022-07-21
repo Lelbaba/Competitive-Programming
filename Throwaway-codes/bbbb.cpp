@@ -13,184 +13,90 @@ using ULL = unsigned long long;
 mt19937_64 rng(random_monke);
 const int MONKE = 0;
 
-/*....................................................................*/
-namespace MCMF {
-    typedef long long F; typedef double C;
-    const F infF = 1e18; const C infC = 1e18;
-
-    const int N = 5005;
-    typedef pair<C, F> PCF;
-
-    struct Edge {int frm, to; C cost; F cap, flow;};
-
-    int n, s, t;
-    vector<Edge> edges;
-    vector<int> adj[N];
-    C pi[N], dis[N];
-    F fl[N];
-    int prv[N], vis[N];
-
-    void init(int nodes, int source, int sink) {
-        n = nodes, s = source, t = sink;
-        for (int i=0; i<n; i++) pi[i] = 0, adj[i].clear();
-        edges.clear();
+/*....................................................................*/ 
+namespace rho{
+    inline ULL mul(ULL a,ULL b,ULL mod){
+        LL ans = a * b - mod * (ULL) (1.L / mod * a * b);
+        return ans + mod * (ans < 0) - mod * (ans >= (LL) mod);
     }
-
-    void addEdge(int u, int v, F cap,C cost) {
-        dbg(u, v, cap, cost);
-        edges.push_back({u, v, cost, cap, 0});
-        edges.push_back({v, u, -cost, 0, 0});
-        adj[u].push_back(edges.size()-2);
-        adj[v].push_back(edges.size()-1);
+    inline ULL bigmod(ULL num,ULL pow,ULL mod){
+        ULL ans = 1;
+        for( ;  pow > 0;  pow >>= 1, num = mul(num, num, mod))
+            if(pow&1) ans = mul(ans,num,mod);
+        return ans;
     }
-
-    bool SPFA() {
-        for (int i=0; i<n; i++) {
-            dis[i] = infC; fl[i] = 0;
-            vis[i] = 0; prv[i] = -1;
+    inline bool is_prime(ULL n){
+        if(n < 2 or n % 6 % 4 != 1) 
+            return (n|1) == 3;
+        ULL a[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022};
+        ULL s = __builtin_ctzll(n-1), d = n >> s;
+        for(ULL x: a){
+            ULL p = bigmod(x % n, d, n), i = s;
+            for( ; p != 1 and p != n-1 and x % n and i--; p = mul(p, p, n));
+            if(p != n-1 and i != s)
+                return false;
         }
-        queue<int> q;
-        q.push(s);
-        dis[s] = 0; fl[s] = infF; vis[s] = 1;
+        return true;
+    }
+    ULL get_factor(ULL n) {
+        auto f = [&](LL x)  { return mul(x, x, n) + 1; };
+        ULL x = 0, y = 0, t = 0, prod = 2, i = 2, q;
+        for(  ; t++ %40 or gcd(prod, n) == 1;   x = f(x), y = f(f(y)) ){
+            (x == y) ? x = i++, y = f(x) : 0;
+            prod = (q = mul(prod, max(x,y) - min(x,y), n)) ? q : prod;
+        }
+        return gcd(prod, n);
+    }
+    map <ULL, int> factorize(ULL n){
+        map <ULL, int> res;
+        if(n < 2)   return res;
+        ULL small_primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97 };
+        for (ULL p: small_primes)
+            for( ; n % p == 0; n /= p, res[p]++);
 
-        while (!q.empty()) {
-            int u = q.front(); q.pop();
-            vis[u] = 0;
-            for (int eid : adj[u]) {
-                Edge &e = edges[eid];
-                if (e.cap == e.flow) continue;
-
-                if (dis[u] + e.cost < dis[e.to]) {
-                    dis[e.to] = dis[u] + e.cost;
-                    fl[e.to] = min(fl[u], e.cap - e.flow);
-                    prv[e.to] = eid^1;
-                    if (!vis[e.to])     q.push(e.to);
-                }
+        auto _factor = [&](ULL n, auto &_factor) {
+            if(n == 1)   return;
+            if(is_prime(n)) 
+                res[n]++;
+            else {
+                ULL x = get_factor(n);
+                _factor(x, _factor);
+                _factor(n / x, _factor);
             }
-        }
-        return fl[t] > 0;
-    }
-
-    PCF solveSPFA() {
-        C cost = 0; F flow = 0;
-        while (SPFA()) {
-            C pathcost = dis[t];
-            cost += pathcost*fl[t]; flow += fl[t];
-            for (int u=t, e=prv[u]; e!=-1; u=edges[e].to, e=prv[u]) {
-                edges[e].flow -= fl[t];
-                edges[e^1].flow += fl[t];
-            }
-        }
-        return {cost, flow};
-    }
-
-    void normalize() {
-        SPFA();
-        for (int i=0; i<n; i++) pi[i] = dis[i];
-    }
-
-    bool Dijkstra() {
-        for (int i=0; i<n; i++) {
-            dis[i] = infC; fl[i] = 0;
-            vis[i] = 0; prv[i] = -1;
-        }
-        priority_queue<pair<C, int>> pq;
-        pq.emplace(0, s);
-        dis[s] = 0; fl[s] = infF;
-
-        while (!pq.empty()) {
-            int u = pq.top().second; pq.pop();
-            if (vis[u]) continue;
-            vis[u] = 1;
-
-            for (int eid : adj[u]) {
-                Edge &e = edges[eid];
-                if (vis[e.to] || e.cap == e.flow) continue;
-
-                C nw = dis[u] + e.cost - pi[e.to] + pi[u];
-                if (nw < dis[e.to]) {
-                    dis[e.to] = nw;
-                    fl[e.to] = min(fl[u], e.cap - e.flow);
-                    prv[e.to] = eid^1;
-                    pq.emplace(-dis[e.to], e.to);
-                }
-            }
-        }
-        return fl[t] > 0;
-    }
-
-    PCF solveDijkstra() {
-        normalize();
-        C cost = 0; F flow = 0;
-        while (Dijkstra()) {
-            for (int i=0; i<n; i++)
-                if (fl[i])     pi[i] += dis[i];
-            C pathcost = pi[t]-pi[s];
-            cost += pathcost*fl[t]; flow += fl[t];
-
-            for (int u=t, e=prv[u]; e!=-1; u=edges[e].to, e=prv[u]) {
-                edges[e].flow -= fl[t];
-                edges[e^1].flow += fl[t];
-            }
-        }
-        return {cost, flow};
+        };
+        _factor(n, _factor);
+        return res;
     }
 }
-// want to minimize cost and don't care about flow
-// add edge from sink to dummy sink (cap = inf, cost = 0)
-// add edge from source to sink (cap = inf, cost = 0)
-// run mcmf, cost returned is the minimum cost
 
-/*....................................................................*/
-
-void solve() {
-    int n, m, k;
-    cin >> n >> m >> k;
-    vector <double> p(k + 1), d(k + 1);
-    vector <int> book(n + 1);
-
-    for(int i = 1; i <= k; i++) 
-        cin >> p[i];
-    for(int i = 1; i <= k; i++) 
-        cin >> d[i];
-    for(int i = 1; i <= n; i++)
-        cin >> book[i];
-
-    double lo = 0, hi = 1;
-    for(int _ = 0; _ < 1; _++) {
-        double mid = lo + (hi - lo) / 2;
-        MCMF :: init(n + 2, 0, n + 1);
-
-        for(int i = 1; i < n; i++)  
-            MCMF :: addEdge(i, i + 1, m - 1, 0.);
-
-        vector <int> last(k + 1);
-        for(int i = 1; i <= n; i++){
-            int b = book[i];
-            if(!last[b]) {
-                MCMF :: addEdge(0, i, 1, p[b]);
-                MCMF :: addEdge(i, n + 1, 1, -d[b] - p[b] * mid);
-            } else {
-                MCMF :: addEdge(0, last[b], 1, p[b] * (1. - mid));
-                MCMF :: addEdge(last[b], i, 1, p[b] - d[b]);
-                MCMF :: addEdge(i, n + 1, 1, p[b] *(mid - 1.));
-            }
-            last[b] = i;
-        }
-        auto [mc, mf] = MCMF :: solveDijkstra();
-        dbg(mc);
-        if(mc < 1e-18) hi = mid;
-        else lo = mid;
+/*....................................................................*/ 
+using LLL = __int128;
+int koto(LLL a, LLL b, LLL v) {
+    int ans;
+    LLL x = 1;
+    for(ans = 0; x <= b; ans++, x = x * v) {
+        if(b / x == (a - 1) / x) break;
     }
-    cout << fixed << setprecision(10) << lo * 100 << '\n';
+    return ans - 1;
+}
+void solve() {
+    LL a, b, c;
+    cin >> a >> b >> c;
+    auto F = rho :: factorize(c);
+    int x = 1e9;
+    for(auto [e, cnt]: F){
+        int z = koto(a, b, e);
+        x = min(x, z / cnt);
+    }
+    cout << x << '\n';
 }
 
 int main()
 {
     monke_flip
-    int t = 1;
+    int t = 1; 
     cin >> t;
-    for (int tc = 1; tc <= t; tc++) {
+    for(int tc = 1; tc <= t; tc++) {
         solve();
     }
     return MONKE;
