@@ -1,15 +1,6 @@
 #include <bits/stdc++.h>
-#define monke_flip ios_base::sync_with_stdio(false); cin.tie(NULL);
-#define random_monke srand(chrono::system_clock::now().time_since_epoch().count());
-#ifdef LEL
-#include <dbg.h>
-#else
-#define dbg(...) {/* temon kichu na; */}
-#endif
-
 using namespace std;
 using LL = long long;
-const int MONKE = 0;
 /*
         segment tree class merely handles segment tree operations
         and the attempt here is to employ it in such a way that
@@ -126,18 +117,8 @@ class segment_tree {
     }
 };
 
-
-void solve(){
-
-}
-int main()
-{
-    monke_flip
-    int t = 1; 
-    cin>>t;
-    for(int tc=1; tc<=t; tc++){
-        cout << "Case "<<tc<<":\n";
-        solve();
-    }
-    return MONKE;
+int main() {
+    ios_base :: sync_with_stdio(0);
+    cin.tie(0);
+    return 0;
 }
