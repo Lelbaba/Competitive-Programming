@@ -1,116 +1,102 @@
 #include <bits/stdc++.h>
-#define monke_flip ios_base::sync_with_stdio(false); cin.tie(NULL);
-#define random_monke chrono::system_clock::now().time_since_epoch().count()
-#ifdef LEL
-#include <dbg.h>
-#else
-#define dbg(...) {/* temon kichu na; */}
-#endif
-
 using namespace std;
 using LL = long long;
-using ULL = unsigned long long;
-mt19937_64 rng(random_monke);
-const int MONKE = 0;
+// solves CodeForces 732F
 
-/*....................................................................*/
-
-using edge = pair <int, int> ;
-class Graph {
-public:
+using edge = pair<int, int>;
+struct graph {
     int n;
     vector<vector<int>> adj;
-    Graph(int n = 0) : n(n), adj(n) {}
-    Graph(int n, vector <pair <int,int>> &edges): n(n), adj(n) {
-        for(auto &[l,r]:edges)
-            add_edge(l, r);
-    }
-    inline void add_edge(int u, int v) {
+    graph(int n = 0) : n(n), adj(n) {}
+    void addEdge(int u, int v, bool f = 1) {
         adj[u].push_back(v);
-        adj[v].push_back(u);
+        if(f) adj[v].push_back(u);
     }
-    inline int add_node() {
-        adj.push_back({});
+    int addNode() {
+        adj.emplace_back();
         return n++;
     }
-    inline vector<int>& operator[](int u) { 
-        return adj[u]; 
-    }
+    vector<int> &operator[](int u) { return adj[u]; }
 };
-class Bridge_Tree {
+struct bridge_tree {
     int n;
-    vector <vector <int>> components;
-    vector <int> depth, low;
-    stack <int> st;
-    void find_bridges(int node, Graph &G, int par = -1, int d = 0) {
+    vector<vector<int>> components;
+    vector<int> depth, low;
+    stack<int> st;
+    void find_bridges(int node, graph &G, int par = -1, int d = 0) {
         low[node] = depth[node] = d;
         st.push(node);
-        for (int e : G[node]) if(par != e) {
-            if(depth[e] == -1) {
-                find_bridges(e, G, node, d + 1);
-                if (low[e] > depth[node]){
-                    bridges.emplace_back(node, e);
-                    components.push_back({});
-                    for(int x = -1; x!= e; x = st.top(), st.pop()) 
-                        components.back().push_back(st.top());
+        for (int e : G[node])
+            if (par != e) {
+                if (depth[e] == -1) {
+                    find_bridges(e, G, node, d + 1);
+                    if (low[e] > depth[node]) {
+                        bridges.emplace_back(node, e);
+                        components.push_back({});
+                        for (int x = -1; x != e; x = st.top(), st.pop())
+                            components.back().push_back(st.top());
+                    }
                 }
+                low[node] = min(low[node], low[e]);
             }
-            low[node] = min(low[node], low[e]);
-        }
-        if(par == -1){
+        if (par == -1) {
             components.push_back({});
-            while(!st.empty())
-                components.back().push_back(st.top()), st.pop();
-        }   
-    }
-public:
-    vector <int> id;
-    vector <edge> bridges;
-    Graph tree;
-    void create_tree() {
-        for(auto &comp : components){
-            int idx = tree.add_node();
-            for(auto &e: comp)
-                id[e] = idx;
+            while (!st.empty()) components.back().push_back(st.top()), st.pop();
         }
-        for(auto &[l,r]: bridges)
-            tree.add_edge(id[l], id[r]);
     }
-    Bridge_Tree(Graph &G): n(G.n) {
-        depth.assign(n,-1), id.assign(n, -1), low.resize(n);
-        for(int i = 0; i < n; i++)
-            if(depth[i] == -1)
-                find_bridges(i, G);
+    vector<int> id;
+    vector<edge> bridges;
+    graph tree;
+    graph &create_tree() {
+        for (auto &comp : components) {
+            int idx = tree.addNode();
+            for (auto &e : comp) id[e] = idx;
+        }
+        for (auto &[l, r] : bridges) tree.addEdge(id[l], id[r]);
+        return tree;
+    }
+    bridge_tree(graph &G) : n(G.n) {
+        depth.assign(n, -1), id.assign(n, -1), low.resize(n);
+        for (int i = 0; i < n; i++)
+            if (depth[i] == -1) find_bridges(i, G);
     }
 };
-
-/*....................................................................*/
-
-void solve() {
+using tree = graph;
+int main() {
+    ios_base :: sync_with_stdio(0);
+    cin.tie(0);
     int n, m;
     cin >> n >> m;
-    Graph G(n);
+    graph G(n);
     vector <edge> edges(m);
-    for(auto &[l,r]:edges){
-        cin >> l >> r;
-        G.add_edge(l, r);
+    for(auto &[u, v]: edges) {
+        cin >> u >> v;
+        u--, v--;
+        G.addEdge(u, v);
     }
-    Bridge_Tree T(G);
-    auto x = &T.create_tree();
+    bridge_tree bt(G);
+    tree T = bt.create_tree();
+    auto &comps = bt.components;
+    auto &id = bt.id;
     int ans = 0;
-    for(auto &e:T.tree.adj)
-        ans += (e.size() == 1);
-    cout << (ans + 1 >> 1) << '\n';
-}
-
-int main()
-{
-    monke_flip
-    int t = 1;
-    cin >> t;
-    for (int tc = 1; tc <= t; tc++) {
-        cout << "Case "<< tc << ": ";
-        solve();
+    for(int i = 1; i < T.n; i++)
+        if(comps[i].size() > comps[ans].size())
+            ans = i;
+    vector <int> par(n, -1), ht(n, 0);
+    function <void (int)> dfs = [&](int node) {
+        for(int to: G[node]) if(par[to] == -1){
+            par[to] = node;
+            ht[to] = ht[node] + 1;
+            dfs(to);
+        }
+    };
+    par[comps[ans][0]] = comps[ans][0];
+    dfs(comps[ans][0]);
+    vector <int> cnt(n);
+    cout << comps[ans].size() << '\n';
+    for(auto &[u, v]: edges) {
+        if(u == par[v]) swap(u, v);
+        else if(v != par[u] and ht[v] < ht[u]) swap(u, v);
+        cout << u + 1 << ' ' << v + 1 << '\n';
     }
-    return MONKE;
 }
