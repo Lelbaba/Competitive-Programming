@@ -1,15 +1,15 @@
 using LL = long long;
 using ULL = unsigned long long;
 namespace sieve{
-    const int maxn = 1e7;
+    const int N = 1e7;
     vector <int> primes;
-    int spf[maxn+5], phi[maxn+5], NOD[maxn+5], cnt[maxn+5], POW[maxn+5]; 
-    bool prime[maxn+5];
-    int SOD[maxn+5];
+    int spf[N+5], phi[N+5], NOD[N+5], cnt[N+5], POW[N+5]; 
+    bool prime[N+5];
+    int SOD[N+5];
     void init(){
-        fill(prime+2, prime+maxn+1, 1);
+        fill(prime+2, prime+N+1, 1);
         SOD[1] = NOD[1] = phi[1] = spf[1] = 1;
-        for(LL i=2;i<=maxn;i++){
+        for(LL i=2;i<=N;i++){
             if(prime[i]) {
                 primes.push_back(i), spf[i] = i;
                 phi[i] = i-1;
@@ -17,7 +17,7 @@ namespace sieve{
                 SOD[i] = i+1, POW[i] = i;
             }
             for(auto p:primes){
-                if(p*i>maxn or p > spf[i]) break;
+                if(p*i>N or p > spf[i]) break;
                 prime[p*i] = false, spf[p*i] = p;
                 if(i%p == 0){
                     phi[p*i]=p*phi[i];

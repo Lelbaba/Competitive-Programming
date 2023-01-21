@@ -8,7 +8,7 @@ using LL = long long;
 struct edge {
     int u, v;
     edge(int u, int v) : u(u), v(v) {}
-    int nxt(int node) { 
+    int to(int node) { 
         return node ^ u ^ v;
     }
 };
@@ -16,13 +16,13 @@ struct graph {
     int n, e = 0;
     vector <vector <int>> adj;
     vector <edge> edges;
-    int updateEdge(int u, int v, bool bi = 1) {
+    int addEdge(int u, int v, bool bi = 1) {
         edges.emplace_back(u, v);
         adj[u].push_back(e);
         if(bi) adj[v].push_back(e);
         return e++;
     }
-    int updateNode() {
+    int addNode() {
         adj.emplace_back();
         return n++;
     }
@@ -41,7 +41,7 @@ namespace et_edge {
     void dfs(graph &G, int node, int par) {
         out[node] = t; 
         for(int e: G[node]) {
-            int v = G(e).nxt(node);
+            int v = G(e).to(node);
             if(v == par) continue;
             fwd[e] = t++;
             dfs(G, v, node);
@@ -90,7 +90,7 @@ int main() {
             LL c;
             cin >> u >> v >> c;
             u--, v--;
-            edgelist[c].push_back(G.updateEdge(u, v));
+            edgelist[c].push_back(G.addEdge(u, v));
         }
         et_edge :: init(G, 0);
         BIT :: init(2 * n);
