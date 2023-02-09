@@ -14,15 +14,12 @@ mt19937_64 rng(random_monke);
 const int MONKE = 0;
 
 /*....................................................................*/ 
-class DSU{
-        vector <int> par,size;
-        // parent of each set and size of each set
-    public:
+struct DSU{
+    vector <int> par,size;
     DSU(int n) : par(n), size(n) {
         fill(size.begin(), size.end(), 1);
         iota(par.begin(), par.end(), 0);
     }
-    // ancestor
     int Anc(int node){
         if(par[node] == node) 
             return node;

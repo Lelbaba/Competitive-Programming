@@ -1,15 +1,7 @@
 #include <bits/stdc++.h>
-#define monke_flip ios_base::sync_with_stdio(false); cin.tie(NULL);
-#define random_monke srand(chrono::system_clock::now().time_since_epoch().count());
-#ifdef LEL
-#include <dbg.h>
-#else
-#define dbg(...) {/* temon kichu na; */}
-#endif
-
 using namespace std;
 using LL = long long;
-const int MONKE = 0;
+// needs to be tested properly
 struct Node {
     const int val, lazy;
     Node* const lft, *const ryt;
@@ -39,7 +31,6 @@ Node* const update(const int ql, const int qr, const int up, Node* const cur, co
     return new Node(update(ql, qr, up, cur -> lft, L, M), update(ql, qr, up, cur -> ryt, M + 1, R), cur -> lazy);
 }
 int main(){
-    monke_flip
     vector <int> v = {2, 1, 5, 3, 4};
     vector <Node*> roots;
     roots.push_back(build(0, 4, v));
@@ -51,5 +42,4 @@ int main(){
         delete roots.back();
         roots.pop_back();
     }
-    return MONKE;
 }
