@@ -3,6 +3,8 @@ using namespace std;
 using LL = long long;
 
 // solves https://dmoj.ca/problem/coci07c4p5
+// Only for commutative updates
+
 const int N = 1e6 + 2;
 using PLL = pair<int, int>;
 
