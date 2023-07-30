@@ -1,20 +1,25 @@
 #include <bits/stdc++.h>
 using namespace std;
 using LL = long long;
-// solves CodeForces 732F
 
-struct edge {
+/*
+    Working bridge tree for non-simple graphs
+    https://judge.yosupo.jp/submission/152794
+*/
+
+struct Edge {
     int u, v;
-    edge(int u = 0, int v = 0) : u(u), v(v) {}
+    Edge(int _u = 0, int _v = 0) : u(_u), v(_v) {}
     int to(int node){
         return u ^ v ^ node;
     }
 };
-struct graph {
+
+struct Graph {
     int n;
-    vector<vector<int>> adj;
-    vector <edge> edges;
-    graph(int n = 0) : n(n), adj(n) {}
+    vector <vector<int>> adj;
+    vector <Edge> edges;
+    Graph(int _n = 0) : n(_n), adj(_n) {}
     void addEdge(int u, int v, bool dir = 1) {
         adj[u].push_back(edges.size());
         if(dir) adj[v].push_back(edges.size());
@@ -24,90 +29,84 @@ struct graph {
         adj.emplace_back();
         return n++;
     }
-    edge &operator()(int idx) { return edges[idx]; }
+    Edge &operator()(int idx) { return edges[idx]; }
     vector<int> &operator[](int u) { return adj[u]; }
 };
-namespace bridge_tree {
-    vector<vector<int>> components;
-    vector<int> depth, low;
-    stack<int> st;
-    vector<int> id;
-    vector<edge> bridges;
-    graph tree;
-    void find_bridges(int node, graph &G, int par = -1, int d = 0) {
-        low[node] = depth[node] = d;
-        st.push(node);
-        for (int id : G[node]) {
-            int to = G(id).to(node);
-            if (par != to) {
-                if (depth[to] == -1) {
-                    find_bridges(to, G, node, d + 1);
-                    if (low[to] > depth[node]) {
-                        bridges.emplace_back(node, to);
-                        components.push_back({});
-                        for (int x = -1; x != to; x = st.top(), st.pop())
-                            components.back().push_back(st.top());
-                    }
-                }
-                low[node] = min(low[node], low[to]);
-            }
+
+namespace BT {
+    vector <vector <int>> comps;
+    vector <int> depth, low, id;
+    stack <int> st;
+    vector <Edge> bridges;
+    Graph tree;
+
+    void dfs(int u, Graph &G, int ed = -1, int d = 0) {
+        low[u] = depth[u] = d;
+        st.push(u);
+
+        for (int e : G[u]) {
+            if(e == ed) continue;
+            int v = G(e).to(u);
+            if (depth[v] == -1) dfs(v, G, e, d + 1); 
+            low[u] = min(low[u], low[v]);
+            
+            if(low[v] <= depth[u]) continue;
+            bridges.emplace_back(u, v);
+            comps.emplace_back();
+            do {
+                comps.back().push_back(st.top()), st.pop();
+            } while(comps.back().back() != v);
         }
-        if (par == -1) {
-            components.push_back({});
-            while (!st.empty()) components.back().push_back(st.top()), st.pop();
+
+        if (ed == -1) {
+            comps.emplace_back();
+            while (!st.empty()) comps.back().push_back(st.top()), st.pop();
         }
     }
-    graph &create_tree() {
-        for (auto &comp : components) {
+
+    Graph &createTree() {
+        for (auto &comp : comps) {
             int idx = tree.addNode();
             for (auto &e : comp) id[e] = idx;
         }
+
         for (auto &[l, r] : bridges) tree.addEdge(id[l], id[r]);
         return tree;
     }
-    void init(graph &G) {
+
+    void init(Graph &G) {
         int n = G.n;
         depth.assign(n, -1), id.assign(n, -1), low.resize(n);
-        for (int i = 0; i < n; i++)
-            if (depth[i] == -1) find_bridges(i, G);
+
+        for (int i = 0; i < n; i++){
+            if (depth[i] == -1) dfs(i, G);
+        }
     }
 }
-using tree = graph;
+
+using Tree = Graph;
 int main() {
     ios_base :: sync_with_stdio(0);
     cin.tie(0);
     int n, m;
     cin >> n >> m;
-    graph G(n);
-    vector <edge> edges(m);
+
+    Graph G(n);
+    vector <Edge> edges(m);
+
     for(auto &[u, v]: edges) {
         cin >> u >> v;
-        u--, v--;
         G.addEdge(u, v);
     }
-    bridge_tree :: init(G);
-    tree T = bridge_tree :: create_tree();
-    auto &comps = bridge_tree :: components;
-    auto &id = bridge_tree :: id;
-    int ans = 0;
-    for(int i = 1; i < T.n; i++)
-        if(comps[i].size() > comps[ans].size())
-            ans = i;
-    vector <int> par(n, -1), ht(n, 0);
-    function <void (int)> dfs = [&](int node) {
-        for(int e: G[node]) if(int to = G(e).to(node); par[to] == -1){
-            par[to] = node;
-            ht[to] = ht[node] + 1;
-            dfs(to);
-        }
-    };
-    par[comps[ans][0]] = comps[ans][0];
-    dfs(comps[ans][0]);
-    vector <int> cnt(n);
-    cout << comps[ans].size() << '\n';
-    for(auto &[u, v]: edges) {
-        if(u == par[v]) swap(u, v);
-        else if(v != par[u] and ht[v] < ht[u]) swap(u, v);
-        cout << u + 1 << ' ' << v + 1 << '\n';
+
+    BT :: init(G);
+    Tree T = BT :: createTree();
+    using BT :: comps;
+    
+    cout << comps.size() << '\n';
+    for(auto &c: comps) {
+        cout << c.size() << ' ';
+        for(int u: c) cout << u << ' ';
+        cout << '\n';
     }
 }
