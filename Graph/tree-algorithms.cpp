@@ -15,8 +15,8 @@ using mat = vector <vector <int>>;
 struct Edge {
     int u, v;
     Edge(int u, int v) : u(u), v(v) {}
-    int go(int node) {
-        return u ^ v ^ node;
+    int to(int _u) {
+        return u ^ v ^ _u;
     }
 };
 
@@ -47,11 +47,11 @@ struct Graph {
 
 using Tree = Graph;
 
-namespace talgo {
+namespace ta {
     int time;
     void dfs(int u, int p, vec &par, vec &lvl, Tree &T) {
         for(int e: T[u]) {
-            int v = T(e).go(u);
+            int v = T(e).to(u);
             if(v == p) continue;
             par[v] = u, lvl[v] = lvl[u] + 1;
             dfs(v, u, par, lvl, T);
@@ -109,7 +109,7 @@ namespace talgo {
 namespace ct {
     int getCentroid(int u, int p, int st, vec &sz, vec &blk, Tree &T) {
         for(int e: T[u]) {
-            int v = T(e).go(u);
+            int v = T(e).to(u);
             if(v == p or blk[v] or sz[v] * 2 <= sz[st]) continue;
             return getCentroid(v, u, st, sz, blk, T);
         }
@@ -118,7 +118,7 @@ namespace ct {
     int compCalc(int u, int p, vec &sz, vec &blk, Tree &T) {
         sz[u] = 1;
         for(int e: T[u]) {
-            int v = T(e).go(u);
+            int v = T(e).to(u);
             if(v == p or blk[v]) continue;
             sz[u] += compCalc(v, u, sz, blk, T);
         }
@@ -130,7 +130,7 @@ namespace ct {
         u = getCentroid(u, -1, u, sz, blk, T);
         blk[u] = 1;
         for(int e: T[u]) {
-            int v = T(e).go(u);
+            int v = T(e).to(u);
             if(blk[v]) continue;
             v = decompose(v, u, sz, blk, T, CT);
             CT.addEdge(u, v);
@@ -159,22 +159,22 @@ int main() {
 
     int centroid = ct :: getCentroidTree(0, T, CT);
 
-    talgo :: time = 0;
+    ta :: time = 0;
 
     vec par(n), lvl(n);
-    talgo :: dfs(0, 0, par, lvl, T);
+    ta :: dfs(0, 0, par, lvl, T);
 
-    mat anc = talgo :: ancestorTable(par);
+    mat anc = ta :: ancestorTable(par);
 
     vec cpar(n, centroid), clvl(n);
-    talgo :: dfs(centroid, centroid, cpar, clvl, CT);
+    ta :: dfs(centroid, centroid, cpar, clvl, CT);
 
 
     vec submin(n, inf);
     auto update = [&](int u) {
         int v = u;
         while(1) {
-            submin[v] = min(submin[v], talgo :: dis(u, v, lvl, anc));
+            submin[v] = min(submin[v], ta :: dis(u, v, lvl, anc));
             if(v == centroid) break;
             v = cpar[v];
         }
@@ -183,7 +183,7 @@ int main() {
     auto query = [&](int u) {
         int v = u, ans = inf;
         while(1) {
-            ans = min(ans, submin[v] + talgo :: dis(u, v, lvl, anc));
+            ans = min(ans, submin[v] + ta :: dis(u, v, lvl, anc));
             if(v == centroid) break;
             v = cpar[v];
         }

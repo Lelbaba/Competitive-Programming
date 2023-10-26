@@ -2,7 +2,7 @@
 using namespace std;
 /*
 tested in https://judge.yosupo.jp/submission/110003
-line 54: a character smaller than the alphabet must be added for suffix array of string, becomes 1-indexed.
+line 56: a character smaller than the alphabet must be added for suffix array of string, becomes 1-indexed.
 otherwise sorts cyclic shifts.
 
 */
