@@ -2,42 +2,21 @@
 using namespace std;
 using LL = long long;
 
+/*
+ * Solves GYM 103446H
+ */
+
 const int N = 2e5 + 5, B = 19;
 const LL INF = 1e18;
 
 using vec = vector <int>;
 using mat = vector <vec>;
+using Tree = mat;
 
-struct Edge {
-    int u, v;
-    Edge(int _u, int _v) : u(_u), v(_v) {}
-    int to(int _u) { return u ^ v ^ _u;}
-};
-
-struct Graph {
-    int n;
-    mat adj;
-
-    vector <Edge> edges;
-    Graph(int _n = 0) : n(_n), adj(_n) {}
-
-    int addNode() {
-        adj.emplace_back();
-        return n++;
-    }
-
-    int addEdge(int u, int v) {
-        adj[u].push_back(edges.size());
-        adj[v].push_back(edges.size());
-        edges.emplace_back(u, v);
-        return edges.size() - 1;
-    }
-
-    vec& operator [](int u) { return adj[u]; }
-    Edge& operator () (int e) { return edges[e]; }
-};
-
-using Tree = Graph;
+void addEdge(Tree &T, int u, int v) {
+    T[u].push_back(v);
+    T[v].push_back(u);
+}
 
 namespace rmq {
     LL tbl[B][N], a[N];
@@ -58,39 +37,8 @@ namespace rmq {
     }
 }
 
-namespace hld {
+namespace ta {
     int anc[B][N], sz[N], lvl[N], st[N], en[N], nxt[N], t = 0;
-
-    void dfs(int u, int p, Tree &T) {
-        sz[u] = 1;
-
-        int eld = 0, mx = 0, idx = 0;
-        for(int e: T[u]) {
-            int v = T(e).to(u);
-            if(v == p) {
-                idx++; continue;
-            }
-
-            anc[0][v] = u, lvl[v] = lvl[u] + 1;
-            dfs(v, u, T);
-
-            if(sz[v] > mx) mx = sz[v], eld = idx;
-            sz[u] += sz[v], idx++;
-        }
-        swap(T[u][0], T[u][eld]);
-    }
-
-    void tour(int u, int p, Tree &T) {
-        st[u] = t++;
-        int idx = 0;
-        for(int e: T[u]) {
-            int v = T(e).to(u);
-            if(v == p) continue; 
-            nxt[v] = (idx++ ? v : nxt[u]);
-            tour(v, u, T);
-        }
-        en[u] = t; // [st, en) contains subtree range 
-    }
 
     void initLifting(int n) {
         for(int b = 1; b < B; b++) {
@@ -127,18 +75,35 @@ namespace hld {
         return st[v] <= st[u] and en[u] <= en[v];
     }
 
-    void init(int u, Tree &T) {
-        int n = T.n;
-        anc[0][u] = nxt[u] = u;
-        dfs(u, u, T);
-        initLifting(n);
-        tour(u, u, T);
+    void tour(int u, int p, Tree &T) {
+        st[u] = t++;
+        int idx = 0;
+        for(int v: T[u]) {
+            if(v == p) continue; 
+            nxt[v] = (idx++ ? v : nxt[u]); // only for hld
+            anc[0][v] = u, lvl[v] = lvl[u] + 1;
+            tour(v, u, T);
+        }
+        en[u] = t; // [st, en] contains subtree range 
     }
 
-    LL pathQuery(int u, int v) {
-        int g = lca(u, v);
-        LL ans = -INF;
+    void hld(int u, int p, Tree &T) {
+        sz[u] = 1;
 
+        int eld = 0, mx = 0, idx = 0;
+        for(int i = 0; i < T[u].size(); i++) {
+            int v = T[u][i];
+            if(v == p) continue;
+            hld(v, u, T);
+
+            if(sz[v] > mx) mx = sz[v], eld = i;
+            sz[u] += sz[v];
+        }
+        swap(T[u][0], T[u][eld]);
+    }
+
+    LL climbQuery(int u, int g) {
+        LL ans = -INF;
         while(1) {
             int _u = nxt[u];
             if(isAncestor(g, _u)) _u = g;
@@ -147,16 +112,20 @@ namespace hld {
             if(_u == g) break;
             u = anc[0][_u];
         }
-
-        while(1) {
-            int _u = nxt[v];
-            if(isAncestor(g, _u)) _u = g;
-            ans = max(ans, rmq :: query(st[_u], st[v]));
-
-            if(_u == g) break;
-            v = anc[0][_u];
-        }
         return ans;
+    }
+
+    LL pathQuery(int u, int v) {
+        int g = lca(u, v);
+        return max(climbQuery(u, g), climbQuery(v, g));
+    }
+
+    void init(int u, Tree &T) {
+        int n = T.size();
+        anc[0][u] = nxt[u] = u;
+        hld(u, u, T);
+        tour(u, u, T);
+        initLifting(n);
     }
 }
 
@@ -229,8 +198,8 @@ int main() {
         u = G.root(u);
         v = G.root(v);
 
-        T.addEdge(_u, u);
-        T.addEdge(_u, v);
+        addEdge(T, _u, u);
+        addEdge(T, _u, v);
 
         val[u] = w - G.pts[u];
         val[v] = w - G.pts[v];
@@ -240,9 +209,9 @@ int main() {
         root = _u;
     }
 
-    hld :: init(root, T);
+    ta :: init(root, T);
     for(int i = 1; i <= n + m; i++) {
-        int j = hld :: st[i];
+        int j = ta :: st[i];
         rmq :: a[j] = val[i]; 
     }
     rmq :: init(n + m + 1);
@@ -252,17 +221,17 @@ int main() {
         LL w;
         cin >> u >> w;
 
-        if(w < hld :: pathQuery(u, u)) {
+        if(w < ta :: pathQuery(u, u)) {
             cout << w + G.pts[u] << '\n';
             continue;
         }
 
         int v = u;
         for(int b = B - 1; b >= 0; b--) {
-            int _u = hld :: anc[b][v];
-            if(hld :: pathQuery(u, _u) <= w) v = _u;
+            int _u = ta :: anc[b][v];
+            if(ta :: pathQuery(u, _u) <= w) v = _u;
         }
-        v = hld :: anc[0][v];
+        v = ta :: anc[0][v];
         cout << G.pts[v] + w << '\n'; 
     }
 }
