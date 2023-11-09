@@ -123,6 +123,7 @@ namespace ta {
     void init(int u, Tree &T) {
         int n = T.size();
         anc[0][u] = nxt[u] = u;
+        lvl[u] = 0;
         hld(u, u, T);
         tour(u, u, T);
         initLifting(n);
