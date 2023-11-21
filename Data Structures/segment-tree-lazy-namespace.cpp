@@ -2,6 +2,30 @@
 using namespace std;
 using LL = long long;
 
+/*--------------------------------------------------
+ * There are six things you need to worry about
+
+    * The data type of the values on the nodes: DT
+    * The data type of the updates on the nodes: LT
+        Lazy data will be the same as an update
+        Lazy data is the update that has ALREADY BEEN 
+        PROCESSED on this node, and WILL BE PUSHED down
+        to the childred later, value is always updated.
+    * How does the value and lazy data of a node change
+        when a new update comes : apply()
+        Merging of updates take place here
+    * How to merge the results of two nodes while answering
+        queries : merge()
+    * What is the identity of apply() : None
+        This is equivalent to "No update", should represent an
+        update which changes nothing
+    * What is the identity of merge() : I
+        This is the equivalent to answering queries in an empty
+        range, a value that will never change the result of an
+        answer
+
+ *--------------------------------------------------*/
+
 namespace segtree {
     const int N = 1000006;
 
