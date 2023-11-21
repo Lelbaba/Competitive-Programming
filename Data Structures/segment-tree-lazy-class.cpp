@@ -11,7 +11,7 @@ struct segtree {
     using DT = typename VT::DT;
     using LT = typename VT::LT;
 
-    int L, R, counter = 1;
+    int L, R;
     vector <VT> tr;
     segtree(int n): L(0), R(n - 1), tr(n << 2) {}
     segtree(int l, int r): L(l), R(r), tr((r - l + 1) << 2) {}
@@ -31,7 +31,7 @@ struct segtree {
         int m = (l + r) >> 1, lft = u << 1, ryt = u << 1 | 1;
         build(l, m, v, lft);
         build(m + 1, r, v, ryt);
-        tr[u].val = VT :: get(tr[lft].val, tr[ryt].val, l, r);
+        tr[u].val = VT :: merge(tr[lft].val, tr[ryt].val, l, r);
     }
 
     void update(int ql,int qr, LT up, int l, int r, int u = 1) {
@@ -44,7 +44,7 @@ struct segtree {
         int m = (l + r) >> 1, lft = u << 1, ryt = u << 1 | 1;
         update(ql, min(m, qr), up,  l,  m, lft);
         update(max(ql, m + 1), qr, up, m + 1, r, ryt);
-        tr[u].val = VT :: get(tr[lft].val, tr[ryt].val, l, r);
+        tr[u].val = VT :: merge(tr[lft].val, tr[ryt].val, l, r);
     }
 
     DT query(int ql, int qr, int l, int r, int u = 1) {
@@ -55,7 +55,7 @@ struct segtree {
         int m = (l + r) >> 1, lft = u << 1, ryt = u << 1 | 1;
         DT ansl = query(ql, min(m, qr), l, m, lft);
         DT ansr = query(max(ql, m + 1), qr, m + 1, r, ryt);
-        return tr[u].get(ansl, ansr, l, r);
+        return tr[u].merge(ansl, ansr, l, r);
     }
 
     void build(vector <DT> &v) { build(L, R, v); }
@@ -80,7 +80,7 @@ struct add_sum {
         u.lz += up;
     }
 
-    static DT get(const DT &a, const DT &b, int l, int r) {
+    static DT merge(const DT &a, const DT &b, int l, int r) {
         return a + b;
     }
 };
@@ -96,7 +96,6 @@ int main() {
         int n, m;
         cin >> n >> m;
         segtree <add_sum> Tree(n);
-        segtree <affine> Tree2(n);
         cout << "Case " << tc << ":\n"; 
         while(m--) {
             int tp, l, r;
