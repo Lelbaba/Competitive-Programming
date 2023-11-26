@@ -56,6 +56,7 @@ namespace SCC {
         int n = G.n;
         vis.assign(n, 0);
         idx.assign(n, -1);
+        comps.clear();
 
         for(int i = 0; i < n; i++) {
             if(!vis[i]) dfs1(i, G);
