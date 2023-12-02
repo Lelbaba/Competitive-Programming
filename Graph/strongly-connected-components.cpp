@@ -28,9 +28,10 @@ struct Graph {
     vector<int> &operator[](int u) { return adj[u]; }
 };
 
+const int N = 3e5 + 5;
 namespace SCC {
-    vector <int> order, comp, idx;
-    vector <bool> vis;
+    int vis[N];
+    vector <int> order, comp;
     vector <vector <int>> comps;
     Graph dag;
 
@@ -44,30 +45,34 @@ namespace SCC {
     }
     void dfs2(int u, Graph &R) {
         comp.push_back(u);
-        idx[u] = comps.size();
+        vis[u] = comps.size();
 
         for(int e: R[u]) {
             int v = R(e).to(u);
-            if(idx[v] == -1) dfs2(v, R);
+            if(vis[v] == -1) dfs2(v, R);
         }
     }
 
     void init(Graph &G) {
         int n = G.n;
-        vis.assign(n, 0);
-        idx.assign(n, -1);
+
+        order.clear();
         comps.clear();
+
+        fill(vis, vis + n, 0);
 
         for(int i = 0; i < n; i++) {
             if(!vis[i]) dfs1(i, G);
         }
+        fill(vis, vis + n, -1);
+
         reverse(order.begin(), order.end());
     
         Graph R(n);
         for(auto &e: G.edges) R.addEdge(e.v, e.u, 0);
 
         for(int u: order) {
-            if(idx[u] != -1) continue;
+            if(vis[u] != -1) continue;
             comp.clear();
             dfs2(u, R);
             comps.push_back(comp);
@@ -87,7 +92,7 @@ namespace SCC {
             for(int u: comps[i]) {
                 for(int e: G[u]) {
                     int v = G(e).to(u);
-                    int j = idx[v];
+                    int j = vis[v];
                     if(taken[j]) continue; // rejects multi-edge
                     dag.addEdge(i, j, 0);
                     taken[j] = 1;
