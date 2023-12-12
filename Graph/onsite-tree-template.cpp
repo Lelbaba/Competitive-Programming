@@ -50,8 +50,8 @@ namespace ta {
         int g = lca(u, v);
         return lvl[u] + lvl[v] - 2 * lvl[g];
     }
-    bool isAncestor(int u, int v) {
-        return st[v] <= st[u] and en[u] <= en[v];
+    bool isAncestor(int u, int p) {
+        return st[p] <= st[u] and en[u] <= en[p];
     }
 
     void tour(int u, int p, Tree &T) {
