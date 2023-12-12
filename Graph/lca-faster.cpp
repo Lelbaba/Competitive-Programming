@@ -11,16 +11,16 @@ using Tree = vector <vector <int>>;
 namespace lca1 {
     int st[N], lvl[N];
     int tbl[B][2 * N];
-    int tt = 0;
+    int t = 0;
 
     void dfs(int u, int p, Tree &T) {
-        st[u] = tt;
-        tbl[0][tt++] = u;
+        st[u] = t;
+        tbl[0][t++] = u;
         for(int v: T[u]) {
             if(v == p) continue;
             lvl[v] = lvl[u] + 1;
             dfs(v, u, T);
-            tbl[0][tt++] = u;
+            tbl[0][t++] = u;
         }
     }
     int low(int u, int v) {
@@ -44,6 +44,7 @@ namespace lca1 {
     }
     void init(int root, Tree &T) {
         lvl[root] = 0;
+        t = 0;
         dfs(root, root, T);
         makeTable(T.size());
     }
